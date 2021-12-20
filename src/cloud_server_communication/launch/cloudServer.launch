@@ -1,0 +1,17 @@
+<launch>
+
+    <arg name="thename" default="m100"/><!--无人机名称（每台无人机必须不相同）-->
+    <arg name="axis" default="2"/><!--坐标系：1为全局自然坐标系，2为局部实验坐标系-->
+    
+    <!-- cloud server -->
+    <node
+    pkg = "cloud_server_communication"
+    type = "cloudServer"
+    name = "server_node"
+    output = "screen"
+    respawn = "true">
+    <param name="num_uav" type="int" value="3"/>
+    <param name="axis_id" type="int" value="$(arg axis)"/>
+    </node>
+
+</launch>

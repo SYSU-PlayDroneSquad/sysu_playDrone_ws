@@ -1,0 +1,19 @@
+<launch>
+    <arg name="uavNumbers" default="1" />
+    <arg name="dji_gazebo" default="dji"/>
+
+    <node name="ground_control_station"
+          pkg="ground_control_station"
+          type="ground_control_station"
+          output="screen">
+        <param name="uavNumbers"  value="$(arg uavNumbers)" />
+        <param name="dji_gazebo" type="string" value="$(arg dji_gazebo)" />
+    </node>
+
+    <node name="get_key"
+          pkg="ground_control_station"
+          type="keyboard_control_hector.py"
+          output="screen"
+          launch-prefix="uxterm -e"/>
+
+</launch>

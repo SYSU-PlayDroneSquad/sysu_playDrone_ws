@@ -1,0 +1,11 @@
+<launch>
+    <arg name="uavNum" />
+
+    <node type="uav_status_update"
+          name="uav_status_update"
+          pkg="ground_control_station"
+          output="screen" >
+        <param name="uavNum" type="int" value="$(arg uavNum)" />
+    </node>
+
+</launch>

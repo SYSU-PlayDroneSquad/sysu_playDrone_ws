@@ -1,0 +1,14 @@
+<launch>
+    <arg name="uavName" />
+    <group ns="$(arg uavName)">
+        <arg name="controllers" default="
+        controller/position
+        controller/velocity
+        controller/attitude
+        "/>
+
+        <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="
+        $(arg controllers) --shutdown-timeout 3"/>
+
+    </group>
+</launch>

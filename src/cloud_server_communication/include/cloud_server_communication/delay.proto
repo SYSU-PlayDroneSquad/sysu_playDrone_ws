@@ -1,0 +1,29 @@
+syntax="proto3";
+package delayMessage;
+
+message DelayMsg
+{
+    string cmd = 100;
+    string str = 101;
+
+    uint32 msg_id = 1;
+    double send_time = 2;
+    uint32 uav_id = 3;
+    double lat = 4;//纬度
+    double lon = 5;//经度
+    double alt = 6;//高度，米
+    double vx = 7;//x轴线速度，米/秒
+    double vy = 8;//y轴线速度，米/秒
+    double vz = 9;//z轴线速度，米/秒
+
+    // set quaternion
+    double x = 10;
+    double y = 11;
+    double z = 12;
+    double w = 13;
+
+    repeated uint32 state = 19;
+    repeated double ct = 20;
+}
+
+

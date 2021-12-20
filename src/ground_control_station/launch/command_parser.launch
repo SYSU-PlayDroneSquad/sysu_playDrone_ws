@@ -1,0 +1,15 @@
+<launch>
+    <arg name="uavName" default="uav1"/>
+    <node name="command_parser"
+          pkg="ground_control_station"
+          type="command_parser"
+          output="screen">
+        <param name="uavName" type="string" value="$(arg uavName)" />
+    </node>
+
+   <!-- <node name="get_keyboard"
+          pkg="ground_control_station"
+          type="keyboard_control.py"
+          output="screen"
+          launch-prefix="gnome-terminal  -e"/>-->
+</launch>
