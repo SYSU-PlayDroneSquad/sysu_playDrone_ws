@@ -17,7 +17,7 @@ class Evader(object):
     def __init__(self, id, loc):
         self.id = id
         self.loc = loc
-        self.v = np.array([0, 0.06])
+        self.v = np.array([0, 0])
 
 
     def angle(self, a, b):

@@ -11,7 +11,7 @@ from environment import Env
 from ground_control_station.msg import Array3
 import numpy as np
 
-hunt_end = True
+hunt_end = False
 
 
 # 输出控制速度到屏幕
@@ -23,18 +23,13 @@ def output_screen(vel_xy):
     print("")
 
 
-# 追捕状态
-def hunt_status(status):
-    global hunt_end
-    hunt_end = status
-
-
 # 追捕
 def hunt(p_locs, e_loc):
     env1 = Env(256, 256)  # 实例化 Env 类
     env1.input(p_locs, e_loc)
-    vel_xy = env1.run()
-    output_screen(vel_xy)
+    global hunt_end
+    vel_xy, hunt_end = env1.run()
+    # output_screen(vel_xy)
     return vel_xy
 
 
@@ -43,7 +38,7 @@ st8 = ST8()
 def treibjagd(pos_arr):
     global st8
     vel_xy = st8.op_vol(pos_arr)
-    output_screen(vel_xy)
+    # output_screen(vel_xy)
     return vel_xy
 
 
@@ -71,9 +66,11 @@ def pos_sub_CB1(pos, pub_list):
     twist_msg = Twist()
     for i in range(8):
         if not hunt_end:
+            # print("追捕中...")
             twist_msg.linear.x = v_xy[0, i]
             twist_msg.linear.y = v_xy[1, i]
         else:
+            # print("围猎中...")
             twist_msg.linear.x = vel_xy[0, i]
             twist_msg.linear.y = vel_xy[1, i]
             twist_msg.linear.z = vel_xy[2, i]

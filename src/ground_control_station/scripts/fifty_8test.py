@@ -17,16 +17,16 @@ class ST8(object):
         self.vp = 0.0  # 无人机速度
 
         self.r0 = 2  # 目标圈半径
-        self.r1 = 4  # 初始圈半径
+        self.r1 = 6  # 初始圈半径
 
         self.n = 8  # 无人机数目
-        self.a = 0.1  # 采用的固定加速度（收缩起始阶段）
-        self.amx = 0.1  # 最大加速度限制（收缩控制阶段）
+        self.a = 0.15  # 采用的固定加速度（收缩起始阶段）
+        self.amx = 0.15  # 最大加速度限制（收缩控制阶段）
 
-        self.a_bri = 0.1  # 撤退上升加速度
-        self.a_bre = 0.1  # 撤退加速
-        self.v_bre = 0.2  # 匀速限制
-        self.x_bre = 1.0  # 撤退减速距离
+        self.a_bri = 0.15  # 撤退上升加速度
+        self.a_bre = 0.15  # 撤退加速
+        self.v_bre = 0.4  # 匀速限制
+        self.x_bre = 2.0  # 撤退减速距离
         self.d_bre = 5.0  # 撤退触发距离
 
         self.px, self.py = np.zeros(self.n), np.zeros(self.n)
@@ -58,7 +58,7 @@ class ST8(object):
         self.n_pz = np.zeros(self.n)
         self.n_pvz = np.zeros(self.n)
         self.juz = self.n * np.ones(self.rn)
-        self.tar_x, self.tar_y = [-9, -4], [0, 0]
+        self.tar_x, self.tar_y = [0, 0], [0, 10]
         # self.tar_x, self.tar_y = [-5, -5], [5, 5]
         self.exx, self.eyy = np.zeros(self.rn), np.zeros(self.rn)
         self.n_exx, self.n_eyy = np.zeros(self.rn), np.zeros(self.rn)
@@ -78,7 +78,7 @@ class ST8(object):
         self.ver_xx, self.ver_yy = np.zeros(self.rn), np.zeros(self.rn)
 
     def op_vol(self, para_xy):  # --------------------------------API: 无人机实时坐标para_xy
-        oex, oey = 0, 0  # ---------------------------------API: 获取目标坐标
+        oex, oey = 0, 24  # ---------------------------------API: 获取目标坐标
         self.pxy = para_xy
         ter, cou = np.zeros(2), np.zeros(2)
         jz = np.zeros(self.rn)
@@ -92,7 +92,7 @@ class ST8(object):
         for k in range(self.n):
             if k % 2 == 0:
                 dm = 0
-                if self.jud[0] <= self.der:
+                if self.jud[0] <= 2 * self.der:
                     self.attack[k] = 1
                     bn0 = 0
                     self.juz_sym[bn0] = 1
@@ -103,8 +103,8 @@ class ST8(object):
                     ST8.srk(self, k, oex, oey, ter, dm)
             else:
                 dm = 1
-                if self.jud[0] <= self.der and self.nxs[0] == 1:
-                    if self.jud[1] <= self.der:
+                if self.jud[0] <= 2 * self.der:
+                    if self.jud[1] <= 2 * self.der and self.nxs[0] == 1:
                         self.attack[k] = 1
                         bn1 = 1
                         self.juz_sym[bn1] = 1
@@ -138,8 +138,10 @@ class ST8(object):
         # print('')
         # print('px:', self.px)
         # print('')
-        # print('juz:', self.juz)
-        # print('')
+        print('jud:', self.jud)
+        print('')
+        print('juz:', self.juz)
+        print('')
         # print('pz:', self.pz)
         # print('')
         return self.vxy
@@ -148,12 +150,12 @@ class ST8(object):
     def back(self, k, oex, oey, bm, jz):
         if self.juz[bm] > self.der:
             if self.pz[k] < self.z + (self.zt - self.z) / 2:  # if self.pz[k] < (self.z + (self.zt - self.z) / 2):
-                if self.pvz[k] < self.v_bre:
+                if self.pvz[k] < (self.v_bre/2):
                     az = self.a_bri
                 else:
                     az = 0
             elif self.pz[k] >= self.z + (self.zt - self.z) / 2 and (self.pz[k] < self.zt):
-                if self.pz[k] >= (self.zt - self.v_bre**2 / (2 * self.a_bri)) and (self.pz[k] < self.zt):
+                if self.pz[k] >= (self.zt - (self.v_bre/2)**2 / (2 * self.a_bri)) and (self.pz[k] < self.zt):
                     az = -self.a_bri
                 else:
                     az = 0
@@ -183,19 +185,20 @@ class ST8(object):
 
             if self.ct[bm] % 4 == 0:  # if self.cc[bm] != self.ct
 
-                if abs(self.tar_x[bm] - self.oxx[bm]) > 1:
-                    self.oxx[bm] += 0.2 * self.ver_xx[bm] * self.dt
-                    self.oyy[bm] += 0 * self.ver_yy[bm] * self.dt
+                self.dis_re[bm] = np.sqrt((self.tar_x[bm] - self.oxx[bm]) ** 2 + (self.tar_y[bm] - self.oyy[bm]) ** 2)
+                self.dis_te[bm] = np.sqrt((self.tar_x[bm] - self.sx) ** 2 + (self.tar_y[bm] - self.sy) ** 2)
+                self.ver_xx[bm] = (self.tar_x[bm] - self.sx) / self.dis_te[bm]
+                self.ver_yy[bm] = (self.tar_y[bm] - self.sy) / self.dis_te[bm]
+
+                if abs(self.tar_y[bm] - self.oyy[bm]) > 1:
+                    self.oxx[bm] += 0 * self.ver_xx[bm] * self.dt
+                    self.oyy[bm] += 0.5 * self.ver_yy[bm] * self.dt
                 else:
                     self.oxx[bm] += 0 * self.ver_xx[bm] * self.dt
                     self.oyy[bm] += 0 * self.ver_yy[bm] * self.dt
                 # print('oxx:', self.oxx)
                 # print('')
 
-                self.dis_re[bm] = np.sqrt((self.tar_x[bm] - self.oxx[bm]) ** 2 + (self.tar_y[bm] - self.oyy[bm]) ** 2)
-                self.dis_te[bm] = np.sqrt((self.tar_x[bm] - self.sx) ** 2 + (self.tar_y[bm] - self.sy) ** 2)
-                self.ver_xx[bm] = (self.tar_x[bm] - self.sx) / self.dis_te[bm]
-                self.ver_yy[bm] = (self.tar_y[bm] - self.sy) / self.dis_te[bm]
                 # vxy = np.sqrt(self.vxx[bm] ** 2 + self.vyy[bm] ** 2)
 
                 # if (self.dis_te[bm] - self.dis_re[bm]) >= 5:
@@ -238,19 +241,19 @@ class ST8(object):
 
             # self.cc[bm] = self.ct
             if bm == 0:
-                xc = self.px[0]
-                d = 3
+                yc = self.py[0]
+                d = 1
             else:
-                xc = self.px[1]
-                d = 2.5
-            if abs(self.tar_x[bm] - xc) <= abs(self.tar_x[bm])-1:
+                yc = self.py[1]
+                d = 0.5
+            if abs(self.tar_y[bm] - yc) <= abs(self.sy)-8:
                 self.nxs[bm] = 1
-            if abs(self.tar_x[bm] - xc) < d:
+            if abs(self.tar_y[bm] - yc) < d:
                 self.vp_x[k], self.vp_y[k] = 0, 0
                 self.land[k] = 1
             else:
-                self.vp_x[k] = 0.2 * self.ver_xx[bm]
-                self.vp_y[k] = 0 * self.ver_yy[bm]
+                self.vp_x[k] = 0 * self.ver_xx[bm]
+                self.vp_y[k] = 0.5 * self.ver_yy[bm]
             self.n_px[k] = self.px[k] + self.vp_x[k] * self.dt
             self.n_py[k] = self.py[k] + self.vp_y[k] * self.dt
 

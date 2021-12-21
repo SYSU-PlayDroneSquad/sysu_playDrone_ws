@@ -45,7 +45,7 @@ class Agent(object):
 
     def whether_in_range(self, e_loc):
         self.dis = np.linalg.norm(np.array(self.loc - e_loc))
-        if self.a_range - 0.5 <= self.dis <= self.a_range + 0.5:
+        if self.a_range - 0.8 <= self.dis <= self.a_range + 0.8:
             self._in_range = 1
             self.state = 1
         else:
@@ -76,7 +76,7 @@ class Agent(object):
                 else:
                     angle1 = self._relative_angle - change
                 new_loc = e_loc + self.dis * np.array([np.cos(angle1), np.sin(angle1)])
-                self.v = (new_loc - self.loc ) * 1.2
+                self.v = (new_loc - self.loc) * 1
 
     def move(self):
         #self.loc = self.loc + self.v
@@ -225,6 +225,17 @@ class Agents(object):
             self.inrange2.sort(key=lambda agent: agent[1])
         if len(self.inrange3) != 0:
             self.inrange3.sort(key=lambda agent: agent[1])
+
+    def whether_complete(self):
+        gaps = []
+        for a in self.agents:
+            gaps.append(a.gap)
+
+        gap_error = np.linalg.norm(gaps)
+        if 0.08 <= gap_error <= 0.13 and len(self.inrange1) == 8:
+            return True
+        else:
+            return False
 
     def _in_range_count(self):
         count = 0

@@ -12,18 +12,29 @@ find_package(catkin REQUIRED COMPONENTS
         message_generation # 自定义消息
         )
 find_package(DJIOSDK REQUIRED)
+find_package(GeographicLib REQUIRED) #地理库
 
 # 下面两个任选一个
 # SET(CMAKE_CXX_FLAGS "-std=c++11 -O3")
 add_compile_options(-std=c++11)
 
-add_message_files(FILES Array3.msg Status.msg)
-generate_messages(DEPENDENCIES std_msgs geometry_msgs)
+# 自定义消息
+add_message_files(FILES Array3.msg Status.msg StatusArray.msg)
+add_service_files(FILES EnableMotors.srv)
+generate_messages(DEPENDENCIES std_msgs geometry_msgs ground_control_station)
+
+
+
 
 include_directories(
         include
         ${catkin_INCLUDE_DIRS}
         dji_sdk/dji_sdk/dji_sdk.h
+)
+include_directories(
+        include
+        ${catkin_INCLUDE_DIRS}
+        ${GeographicLib_INCLUDE_DIRS}
 )
 
 catkin_package(
@@ -34,13 +45,11 @@ catkin_package(
 )
 
 
-
 add_library(
-        ground_control_station_lib
+        simulation_control_station_lib
         include/HectorQuadrotor.h
-        include/DjiController.h
         include/UavGroup.h
-        src/ground_control_station.cpp
+        src/simulation_control_station.cpp
 )
 
 add_library(
@@ -57,10 +66,9 @@ add_library(
 )
 
 
-add_executable(ground_control_station src/ground_control_station.cpp)
-target_link_libraries(ground_control_station ground_control_station_lib ${catkin_LIBRARIES} ${DJIOSDK_LIBRARIES})
-add_dependencies(ground_control_station hector_uav_msgs_generate_messages_cpp)
-
+add_executable(simulation_control_station src/simulation_control_station.cpp)
+target_link_libraries(simulation_control_station simulation_control_station_lib ${catkin_LIBRARIES})
+add_dependencies(simulation_control_station hector_uav_msgs_generate_messages_cpp)
 
 add_executable(command_parser src/command_parser.cpp)
 target_link_libraries(command_parser command_parser_lib ${catkin_LIBRARIES} ${DJIOSDK_LIBRARIES})
@@ -70,6 +78,9 @@ target_link_libraries(uav_status_update uav_status_update_lib ${catkin_LIBRARIES
 
 add_executable(simulation_position_fusion src/simulation_position_fusion.cpp)
 target_link_libraries(simulation_position_fusion  ${catkin_LIBRARIES})
+
+add_executable(ground_control_station src/ground_control_station.cpp)
+target_link_libraries(ground_control_station  ${catkin_LIBRARIES} ${GeographicLib_LIBRARIES})
 
 
 

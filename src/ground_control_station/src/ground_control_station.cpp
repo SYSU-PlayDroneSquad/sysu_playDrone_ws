@@ -1,108 +1,45 @@
-// ROS includes
+// ros include
 #include <ros/ros.h>
-#include <std_msgs/String.h>
+#include <sensor_msgs/NavSatFix.h>
+#include <geometry_msgs/Quaternion.h>
+
+
+// other include
+#include <GeographicLib/LocalCartesian.hpp>
+#include<iomanip>
 
 // customer include
-#include "HectorQuadrotor.h"
-#include "DjiController.h"
-#include "UavGroup.h"
+#include "uav_visualization.h"
+#include "ground_control_station/Status.h"
+#include "ground_control_station/StatusArray.h"
 
 using std::cout;
 using std::endl;
 using std::string;
+using std::left;
+using std::right;
+using std::setw; // 对齐
+using std::setprecision; // 精确
 
-// dji 键盘控制
-void djiCtrl_keyCB(const std_msgs::String::ConstPtr cmd, UavGroup<DjiN3Controller> &controller ) {
-    string data = cmd->data;
-    controller.baseControl(data);
-}
-// dji 位置控制
-void djiSet_group_position_CB(const sensor_msgs::Joy::ConstPtr msg, UavGroup<DjiN3Controller> &controller){// 待完善
-    controller.pos_globalControl(*msg);
-}
-//dji 速度控制
-void djiSet_group_velocity_CB(const sensor_msgs::Joy::ConstPtr msg, UavGroup<DjiN3Controller> &controller){// 待完善
-    controller.vel_globalControl(*msg);
-}
 
-// gazebo 键盘控制
-void ctrl_keyCB(const std_msgs::String::ConstPtr cmd, UavGroup<HectorQuadrotor> &controller) {
-    string data = cmd->data;
-    controller.baseControl(data);
-}
-// gazebo 位置控制
-void set_group_position_CB(const sensor_msgs::Joy::ConstPtr msg, UavGroup<HectorQuadrotor> &controller){// 待完善
-    controller.pos_globalControl(*msg);
-}
-// gazebo 速度控制
-void set_group_velocity_CB(const sensor_msgs::Joy::ConstPtr msg, UavGroup<HectorQuadrotor> &controller){// 待完善
-    controller.vel_globalControl(*msg);
-}
+// 订阅 dji_sdk 发布的 gps 坐标
+void status_sub_CB(const ground_control_station::StatusArrayConstPtr& status){
 
+}
 
 int main(int argc, char **argv) {
-    ros::init(argc, argv, "ground_control_station");
+    ros::init(argc, argv, "uav_marker");
     ros::NodeHandle nh;
-    ros::NodeHandle n;
-    // 要控制的无人机数量
-    int uavNumbers;
+    string shape_frame = "十";
+    nh.getParam("/shape_frame", shape_frame);
+    UavMarker uavMarker(nh, shape_frame);
 
-    // dji 接口或 gazebo 仿真接口
-    string dji_gazebo;
+    ros::Subscriber status_sub = nh.subscribe<ground_control_station::StatusArray>
+            ("/uav1/dji_sdk/gps_position", 10, boost::bind(status_sub_CB, _1));
 
-    // 从参数服务器获取 uavNumbers 和 dji_gazebo 变量值
-    nh.param("/ground_control_station/uavNumbers", uavNumbers, 10);
-    nh.getParam("/ground_control_station/dji_gazebo", dji_gazebo);
+    ros::Timer revolutions_per_second = nh.createTimer(ros::Duration(0.02), &UavMarker::rps_CB, &uavMarker);
 
-    printf("\33[33mstation\33[0m: \33[32mdji_gazebo\33[0m = \33[36m%s\33[0m\n\n", dji_gazebo.c_str());
+//    UavMarker::pub_frame();
 
-    printf("\33[33mstation\33[0m: \33[32muavNumbers\33[0m = \33[36m%d\33[0m\n\n", uavNumbers);
-
-    if (dji_gazebo == "dji") {
-        // 创建 dji N3 无人机类型组
-        UavGroup<DjiN3Controller> dji_uav_group(n, uavNumbers);
-
-        // dji_osdk 初始化
-        cout << "\033[33m初始化开始...\033[0m" << endl;
-        dji_uav_group.osdk_init(dji_gazebo);
-
-        // 键盘控制
-        ros::Subscriber key_subscriber = nh.subscribe<std_msgs::String>(
-                "key", 1,boost::bind(djiCtrl_keyCB, _1, dji_uav_group));
-
-        // 位置控制
-        ros::Subscriber set_group_position_sub = nh.subscribe<sensor_msgs::Joy>(
-                "set_group_position", 1, boost::bind(djiSet_group_position_CB, _1, dji_uav_group));
-
-        // 速度控制
-        ros::Subscriber set_group_velocity_sub = nh.subscribe<sensor_msgs::Joy>(
-                "set_group_velocity", 1, boost::bind(djiSet_group_velocity_CB, _1, dji_uav_group));
-
-        ros::spin();
-    } else if (dji_gazebo == "gazebo") {
-        // 创建 gazebo 无人机类型组
-        UavGroup<HectorQuadrotor> hec_uav_group(n, uavNumbers);
-
-        // 键盘控制无人机组
-        ros::Subscriber key_subscriber2 = nh.subscribe<std_msgs::String>(
-                "key", 1,boost::bind(ctrl_keyCB, _1, hec_uav_group));
-
-        // 位置控制
-        ros::Subscriber set_group_position_sub = nh.subscribe<sensor_msgs::Joy>(
-                "set_group_position", 1, boost::bind(set_group_position_CB, _1, hec_uav_group));
-
-        // 速度控制
-        ros::Subscriber set_group_velocity_sub = nh.subscribe<sensor_msgs::Joy>(
-                "set_group_velocity", 1, boost::bind(set_group_velocity_CB, _1, hec_uav_group));
-
-
-        ros::spin();
-    } else {
-        cout << "\033[31mError: 请输入参数 dji_gazebo 的值" << endl;
-        return 1;
-    }
-
+    ros::spin();
 }
-
-
-

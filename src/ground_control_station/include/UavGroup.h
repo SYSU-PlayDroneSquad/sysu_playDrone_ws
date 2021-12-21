@@ -2,7 +2,6 @@
 #define HECTOR_QUADROTOR_WS_UAVGROUP_H
 
 #include "HectorQuadrotor.h"
-#include "DjiController.h"
 
 using std::cout;
 using std::endl;
@@ -37,7 +36,6 @@ public:
     void check_data(){
 
     }
-
 
     void baseControl(const std::string data){
         if (data == "MotorUnlock") {

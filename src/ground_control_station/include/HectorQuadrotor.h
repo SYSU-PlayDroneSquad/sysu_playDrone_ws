@@ -8,7 +8,7 @@
 #include <sensor_msgs/Joy.h>
 #include <string>
 //#include <Eigen/Dense>
-#include <hector_uav_msgs/EnableMotors.h>
+#include <ground_control_station/EnableMotors.h>
 
 
 using std::cout;
@@ -52,7 +52,7 @@ public:
         // 初始化 ros 发布器、服务器用户端
         _position_pub = nh.advertise<geometry_msgs::PoseStamped>(_uavName + "/command/pose", 1);
         _twist_pub = nh.advertise<geometry_msgs::Twist>(_uavName + "/cmd_vel", 1);
-        _enable_motor_client = nh.serviceClient<hector_uav_msgs::EnableMotors>(_uavName + "/enable_motors");
+        _enable_motor_client = nh.serviceClient<ground_control_station::EnableMotors>(_uavName + "/enable_motors");
         _get_uav_state_client = nh.serviceClient<gazebo_msgs::GetModelState>("gazebo/get_model_state");
 
         /// dji接口
@@ -66,7 +66,7 @@ public:
 
     /// 键盘控制
     void motor_control() {
-        hector_uav_msgs::EnableMotors srv;
+        ground_control_station::EnableMotors srv;
         srv.request.enable = true;
         _enable_motor_client.call(srv);
         cout << _uavName << " enable success!" << endl;

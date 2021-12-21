@@ -19,7 +19,7 @@ class Env(object):
         self.esize = esize
         self.evaders = Evaders(esize)
         self.agents = Agents(psize)
-        self.cap_r = 0.8
+        self.cap_r = 0.7
 
     def init(self):
         self.evaders.init()
@@ -38,7 +38,6 @@ class Env(object):
         theta = np.arccos(cos_theta)
 
         return theta
-
 
     def plot(self, i):
         fig, ax = plt.subplots()
@@ -110,6 +109,7 @@ class Env(object):
         self.agents.get_all_gap()
         self.agents.get_v(self.evaders.evaders[0].loc, self.evaders.evaders[0].v)
 
+        status = self.agents.whether_complete()
         v = np.zeros((2, 8), dtype='f8')
 
 
@@ -124,7 +124,7 @@ class Env(object):
 
 
 
-        return v
+        return v, status
 
 
     def input(self, locs, e_loc):
@@ -132,7 +132,7 @@ class Env(object):
         i = 0
         for p in locs:
             l = np.array([p[0], p[1]])
-            a = Agent(i, l, 1, 8)
+            a = Agent(i, l, 1, 5)
             self.agents.agents.append(a)
             i = i + 1
 
