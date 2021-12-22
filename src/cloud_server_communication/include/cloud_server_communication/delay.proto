@@ -22,6 +22,9 @@ message DelayMsg
     double z = 12;
     double w = 13;
 
+    // set GPS_health
+    uint32 gps = 14;
+
     repeated uint32 state = 19;
     repeated double ct = 20;
 }

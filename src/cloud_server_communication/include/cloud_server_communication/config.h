@@ -26,7 +26,7 @@ char pubaddr[30]="tcp://*:7050";
 char pub_addr[30] = "tcp://*:18000";
 
 char sub_addr_list[21][30] = {
-    "tcp://10.8.0.7:18000", 
+    "tcp://localhost:18000", 
     "tcp://10.8.0.11:18000", 
     "tcp://10.8.0.13:18000",
     "tcp://10.8.0.15:18000",
@@ -52,7 +52,7 @@ char sub_addr_list[21][30] = {
 char pub_ground_addr[30] = "tcp://*:18001";
 
 char sub_ground_addr_list[20][30] = {
-    "tcp://10.8.0.11:18001", 
+    "tcp://localhost:18001", 
     "tcp://10.8.0.13:18001",
     "tcp://10.8.0.15:18001",
     "tcp://10.8.0.17:18001",

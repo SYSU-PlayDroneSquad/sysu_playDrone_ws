@@ -13,7 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   rosmsg
   rospy
   image_transport
-  
+  ground_control_station
   #protobuf REQUIRED PATHS /usr/local/lib/libprotobuf.a
 )
 

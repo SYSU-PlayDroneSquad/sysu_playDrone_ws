@@ -36,7 +36,7 @@ void protobuf_AssignDesc_delay_2eproto() {
       "delay.proto");
   GOOGLE_CHECK(file != NULL);
   DelayMsg_descriptor_ = file->message_type(0);
-  static const int DelayMsg_offsets_[17] = {
+  static const int DelayMsg_offsets_[18] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, cmd_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, str_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, msg_id_),
@@ -52,6 +52,7 @@ void protobuf_AssignDesc_delay_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, y_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, z_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, w_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, gps_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, state_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, ct_),
   };
@@ -98,13 +99,14 @@ void protobuf_AddDesc_delay_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\013delay.proto\022\014delayMessage\"\351\001\n\010DelayMsg"
+    "\n\013delay.proto\022\014delayMessage\"\366\001\n\010DelayMsg"
     "\022\013\n\003cmd\030d \001(\t\022\013\n\003str\030e \001(\t\022\016\n\006msg_id\030\001 \001"
     "(\r\022\021\n\tsend_time\030\002 \001(\001\022\016\n\006uav_id\030\003 \001(\r\022\013\n"
     "\003lat\030\004 \001(\001\022\013\n\003lon\030\005 \001(\001\022\013\n\003alt\030\006 \001(\001\022\n\n\002"
     "vx\030\007 \001(\001\022\n\n\002vy\030\010 \001(\001\022\n\n\002vz\030\t \001(\001\022\t\n\001x\030\n "
-    "\001(\001\022\t\n\001y\030\013 \001(\001\022\t\n\001z\030\014 \001(\001\022\t\n\001w\030\r \001(\001\022\r\n\005"
-    "state\030\023 \003(\r\022\n\n\002ct\030\024 \003(\001b\006proto3", 271);
+    "\001(\001\022\t\n\001y\030\013 \001(\001\022\t\n\001z\030\014 \001(\001\022\t\n\001w\030\r \001(\001\022\013\n\003"
+    "gps\030\016 \001(\r\022\r\n\005state\030\023 \003(\r\022\n\n\002ct\030\024 \003(\001b\006pr"
+    "oto3", 284);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "delay.proto", &protobuf_RegisterTypes);
   DelayMsg::default_instance_ = new DelayMsg();
@@ -137,6 +139,7 @@ const int DelayMsg::kXFieldNumber;
 const int DelayMsg::kYFieldNumber;
 const int DelayMsg::kZFieldNumber;
 const int DelayMsg::kWFieldNumber;
+const int DelayMsg::kGpsFieldNumber;
 const int DelayMsg::kStateFieldNumber;
 const int DelayMsg::kCtFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
@@ -178,6 +181,7 @@ void DelayMsg::SharedCtor() {
   y_ = 0;
   z_ = 0;
   w_ = 0;
+  gps_ = 0u;
 }
 
 DelayMsg::~DelayMsg() {
@@ -239,6 +243,7 @@ void DelayMsg::Clear() {
   cmd_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   str_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ZR_(vx_, w_);
+  gps_ = 0u;
 
 #undef ZR_HELPER_
 #undef ZR_
@@ -447,6 +452,21 @@ bool DelayMsg::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
+        if (input->ExpectTag(112)) goto parse_gps;
+        break;
+      }
+
+      // optional uint32 gps = 14;
+      case 14: {
+        if (tag == 112) {
+         parse_gps:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &gps_)));
+
+        } else {
+          goto handle_unusual;
+        }
         if (input->ExpectTag(154)) goto parse_state;
         break;
       }
@@ -610,6 +630,11 @@ void DelayMsg::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteDouble(13, this->w(), output);
   }
 
+  // optional uint32 gps = 14;
+  if (this->gps() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(14, this->gps(), output);
+  }
+
   // repeated uint32 state = 19;
   if (this->state_size() > 0) {
     ::google::protobuf::internal::WireFormatLite::WriteTag(19, ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED, output);
@@ -719,6 +744,11 @@ void DelayMsg::SerializeWithCachedSizes(
   // optional double w = 13;
   if (this->w() != 0) {
     target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(13, this->w(), target);
+  }
+
+  // optional uint32 gps = 14;
+  if (this->gps() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(14, this->gps(), target);
   }
 
   // repeated uint32 state = 19;
@@ -862,6 +892,13 @@ int DelayMsg::ByteSize() const {
     total_size += 1 + 8;
   }
 
+  // optional uint32 gps = 14;
+  if (this->gps() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::UInt32Size(
+        this->gps());
+  }
+
   // repeated uint32 state = 19;
   {
     int data_size = 0;
@@ -970,6 +1007,9 @@ void DelayMsg::MergeFrom(const DelayMsg& from) {
   if (from.w() != 0) {
     set_w(from.w());
   }
+  if (from.gps() != 0) {
+    set_gps(from.gps());
+  }
 }
 
 void DelayMsg::CopyFrom(const ::google::protobuf::Message& from) {
@@ -1011,6 +1051,7 @@ void DelayMsg::InternalSwap(DelayMsg* other) {
   std::swap(y_, other->y_);
   std::swap(z_, other->z_);
   std::swap(w_, other->w_);
+  std::swap(gps_, other->gps_);
   state_.UnsafeArenaSwap(&other->state_);
   ct_.UnsafeArenaSwap(&other->ct_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
@@ -1296,6 +1337,20 @@ void DelayMsg::clear_w() {
   
   w_ = value;
   // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.w)
+}
+
+// optional uint32 gps = 14;
+void DelayMsg::clear_gps() {
+  gps_ = 0u;
+}
+ ::google::protobuf::uint32 DelayMsg::gps() const {
+  // @@protoc_insertion_point(field_get:delayMessage.DelayMsg.gps)
+  return gps_;
+}
+ void DelayMsg::set_gps(::google::protobuf::uint32 value) {
+  
+  gps_ = value;
+  // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.gps)
 }
 
 // repeated uint32 state = 19;

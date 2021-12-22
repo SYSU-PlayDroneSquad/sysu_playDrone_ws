@@ -13,6 +13,9 @@
 #include <geometry_msgs/QuaternionStamped.h>
 #include <sensor_msgs/NavSatFix.h>
 
+#include "ground_control_station/Status.h"
+#include "ground_control_station/StatusArray.h"
+
 using namespace std;
 
 void* ctx = zmq_ctx_new();
@@ -20,36 +23,39 @@ void* subscriber = zmq_socket(ctx, ZMQ_SUB);
 vector<void*> subscriberList = vector<void*>(51, zmq_socket(ctx, ZMQ_SUB));
 string uavName("uav");
 int numUav;
+int seq[51];
 
 ros::Publisher attitudePub;
 ros::Publisher positionPub;
 
 delayMessage::DelayMsg delaymsg;
+ground_control_station::Status status;
 ros::Time stamp;
 
-void pubAttAndGPS(){
+void assignStatus() {
     stamp.sec = delaymsg.send_time();
-    // assign attitude
-    geometry_msgs::QuaternionStamped att_msg;
-    att_msg.header.seq      = delaymsg.msg_id();
-    att_msg.header.stamp    = stamp;
-    att_msg.header.frame_id = delaymsg.str();
-    att_msg.quaternion.x    = delaymsg.x();
-    att_msg.quaternion.y    = delaymsg.y();
-    att_msg.quaternion.z    = delaymsg.z();
-    att_msg.quaternion.w    = delaymsg.w();
+    // Assign header
+    status.header.seq      = delaymsg.msg_id();
+    status.header.stamp    = stamp;
+    status.header.frame_id = delaymsg.str();
+
+    // Assign GPS_health
+    status.lv_gps          = delaymsg.gps();
+
+    // Assign attitude
+    status.quaternion.x    = delaymsg.x();
+    status.quaternion.y    = delaymsg.y();
+    status.quaternion.z    = delaymsg.z();
+    status.quaternion.w    = delaymsg.w();
 
     // assign GPS_position
-    sensor_msgs::NavSatFix pos_msg;
-    pos_msg.header.seq      = delaymsg.msg_id();
-    pos_msg.header.stamp    = stamp;
-    pos_msg.header.frame_id = delaymsg.str();
-    pos_msg.latitude        = delaymsg.lat();
-    pos_msg.longitude       = delaymsg.lon();
-    pos_msg.altitude        = delaymsg.alt();
+    status.latitude        = delaymsg.lat();
+    status.longitude       = delaymsg.lon();
+    status.altitude        = delaymsg.alt();
 
-    attitudePub.publish(att_msg);
-    positionPub.publish(pos_msg);
+    status.seq = seq[delaymsg.uav_id()] + 1;
+    seq[delaymsg.uav_id()] = status.seq;
+
 }
 
 int main(int argc, char **argv)
@@ -58,14 +64,12 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     ros::param::get("~uav_name", uavName);
     ros::param::get("~num_uav", numUav);
-    // delayMessage::DelayMsg delaymsg;
 
-    // ros::Publisher odom_pub = nh.advertise<vector<nav_msgs::Odometry>>("odom", 1);
+    ground_control_station::StatusArray statusArray;
+    vector<ground_control_station::Status> statusarr(numUav);
 
     // publish msg to ground control station
-    attitudePub = nh.advertise<geometry_msgs::QuaternionStamped>("attitude", 10);
-    positionPub = nh.advertise<sensor_msgs::NavSatFix>("GPS_position", 10);
-    ros::Publisher pub = nh.advertise<std_msgs::String>("status_msg", 1000);
+    ros::Publisher statusPub = nh.advertise<ground_control_station::StatusArray>("status", 10);
 
     for(int i=0;i<numUav;++i){
         if(0==zmq_connect(subscriberList[i], sub_ground_addr_list[i])){
@@ -77,17 +81,8 @@ int main(int argc, char **argv)
         }
         zmq_setsockopt(subscriberList[i], ZMQ_SUBSCRIBE, "", 0);
     }
-
-    // if(0==zmq_connect(subscriberList[0], sub_ground_addr_list[0])){
-    //     ROS_INFO("client %d bind success", 0);//return 0 if success
-    // }
-    // else{
-    //     perror("server bind failed:");
-    //     return -1;
-    // }
-    // zmq_setsockopt(subscriberList[0], ZMQ_SUBSCRIBE, "", 0);
     
-    ros::Rate loop_rate(1);
+    ros::Rate loop_rate(100);
 
     while(ros::ok()){
         delaymsg.Clear();
@@ -103,22 +98,26 @@ int main(int argc, char **argv)
                 ROS_INFO("Ground control station receive message (%d bytes) success.", recv_byte);
 
                 string str;
-                std_msgs::String status;
+                // std_msgs::String status;
                 str.assign((char*)zmq_msg_data(&recv_msg),recv_byte);
                 zmq_msg_close(&recv_msg);
                 //    int index = str.find_first_of('\0');
                 //    ROS_INFO("%d",index);
                 //    delaymsg.ParseFromString(str.substr(0,index));
                 delaymsg.ParseFromString(str);
-                ROS_INFO("The status of uav%d : %s", delaymsg.uav_id(), delaymsg.cmd().c_str());
-                ROS_INFO("The sequence: %d, the stamp: %f, the frame_id: %s", delaymsg.msg_id(), delaymsg.send_time(), delaymsg.str().c_str());
-                ROS_INFO("The latitude: %f, the longitude: %f, the altitude: %f", delaymsg.lat(), delaymsg.lon(), delaymsg.alt());
-                ROS_INFO("The x: %f, the y: %f, the z: %f, the w: %f", delaymsg.x(), delaymsg.y(), delaymsg.z(), delaymsg.w());
-                pubAttAndGPS();
-                status.data = delaymsg.cmd();
-                pub.publish(status);
+                assignStatus();
+
+                ROS_INFO("The status of uav%d : %d", delaymsg.uav_id(), status.lv_gps);
+                ROS_INFO("The sequence: %d, the stamp: %f, the frame_id: %s", status.seq, delaymsg.send_time(), delaymsg.str().c_str());
+                ROS_INFO("The latitude: %f, the longitude: %f, the altitude: %f", status.latitude, status.longitude, status.altitude);
+                ROS_INFO("The x: %f, the y: %f, the z: %f, the w: %f", status.quaternion.x, status.quaternion.y, status.quaternion.z, status.quaternion.w);
+
+                statusarr[i] = status;
             }
-        }   
+        }  
+
+        statusArray.StatusArray = statusarr;
+        statusPub.publish(statusArray); 
 
         ros::spinOnce();
         loop_rate.sleep();

@@ -200,6 +200,12 @@ class DelayMsg : public ::google::protobuf::Message /* @@protoc_insertion_point(
   double w() const;
   void set_w(double value);
 
+  // optional uint32 gps = 14;
+  void clear_gps();
+  static const int kGpsFieldNumber = 14;
+  ::google::protobuf::uint32 gps() const;
+  void set_gps(::google::protobuf::uint32 value);
+
   // repeated uint32 state = 19;
   int state_size() const;
   void clear_state();
@@ -248,6 +254,7 @@ class DelayMsg : public ::google::protobuf::Message /* @@protoc_insertion_point(
   mutable int _state_cached_byte_size_;
   ::google::protobuf::RepeatedField< double > ct_;
   mutable int _ct_cached_byte_size_;
+  ::google::protobuf::uint32 gps_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_delay_2eproto();
   friend void protobuf_AssignDesc_delay_2eproto();
@@ -532,6 +539,20 @@ inline void DelayMsg::set_w(double value) {
   
   w_ = value;
   // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.w)
+}
+
+// optional uint32 gps = 14;
+inline void DelayMsg::clear_gps() {
+  gps_ = 0u;
+}
+inline ::google::protobuf::uint32 DelayMsg::gps() const {
+  // @@protoc_insertion_point(field_get:delayMessage.DelayMsg.gps)
+  return gps_;
+}
+inline void DelayMsg::set_gps(::google::protobuf::uint32 value) {
+  
+  gps_ = value;
+  // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.gps)
 }
 
 // repeated uint32 state = 19;
