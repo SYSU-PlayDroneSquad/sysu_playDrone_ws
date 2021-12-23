@@ -30,7 +30,7 @@
     <param name="num_uav" type="int" value="$(arg num)"/>
     <remap from="GPS_position" to="toBeNamed_1"/>
     <remap from="attitude" to="toBeNamed_2"/>
-    <remap from="GPS_health" to="$(arg name)/status"/>
+    <remap from="status" to="UAVs/status"/>
     </node>
 
     <node

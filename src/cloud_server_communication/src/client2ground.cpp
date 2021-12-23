@@ -49,6 +49,7 @@ int sendMsg(delayMessage::DelayMsg delaymsg){
 
 void health_callback(const std_msgs::UInt8::ConstPtr& health){
     delaymsg.set_gps(health->data);
+
 }
 
 void odometryCallback(const geometry_msgs::QuaternionStamped::ConstPtr& att, const sensor_msgs::NavSatFix::ConstPtr& pos){  

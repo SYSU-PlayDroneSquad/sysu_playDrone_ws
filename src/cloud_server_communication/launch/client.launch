@@ -28,9 +28,9 @@
         <param name="uav_name" type="string" value="$(arg name)"/>
         <param name="axis_id" type="int" value="$(arg axis)"/>
         <param name="num_uav" type="int" value="$(arg num)"/>
-        <remap from="GPS_position" to="/uav1/dji_sdk/gps_position"/>
-        <remap from="attitude" to="/uav1/dji_sdk/attitude"/>
-        <remap from="status_msg" to="$(arg name)/status"/>
+        <remap from="GPS_position" to="$(arg name)/dji_sdk/gps_position"/>
+        <remap from="attitude" to="$(arg name)/dji_sdk/attitude"/>
+        <remap from="GPS_health" to="$(arg name)/dji_sdk/gps_health"/>
     </node>
 <!--
     <node
