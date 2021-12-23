@@ -8,7 +8,7 @@
 //#include "../include/delay/delay.pb.cc"
 #include <nav_msgs/Odometry.h>
 #include "../include/cloud_server_communication/config.h"
-#include <std_msgs/String.h>
+#include <std_msgs/UInt8.h>
 #include <geometry_msgs/QuaternionStamped.h>
 #include <sensor_msgs/NavSatFix.h>
 
@@ -23,6 +23,7 @@ using namespace message_filters;
 void* ctx = zmq_ctx_new();
 void* ground = zmq_socket(ctx, ZMQ_PUB);
 string uavName("uav");
+delayMessage::DelayMsg delaymsg;
 
 int uavIndex;
 
@@ -46,35 +47,16 @@ int sendMsg(delayMessage::DelayMsg delaymsg){
     return send_byte;
 }
 
-void state_callback(const std_msgs::String::ConstPtr& state){
-    delayMessage::DelayMsg delaymsg;
-    // delayMessage::Test test;
-    delaymsg.set_uav_id(uavIndex);
-    delaymsg.set_send_time(ros::Time::now().toSec());
-    delaymsg.set_cmd(state->data.c_str());
-
-    // delaymsg.set_xo(8.8);
-    // delaymsg.set_yo(8.8);
-    // delaymsg.set_zo(8.8);
-    // delaymsg.set_wo(8.8);
-    // delaymsg.set_xt(8.8);
-    // delaymsg.set_yt(8.8);
-    // delaymsg.set_zt(8.8);
-    // delaymsg.set_wt(8.8);
-    // delaymsg.set_co({0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0, 32.0, 33.0, 34.0, 35.0});
-    // test.set_allocated_ddd(&delaymsg);
-
-    sendMsg(delaymsg);
+void health_callback(const std_msgs::UInt8::ConstPtr& health){
+    delaymsg.set_gps(health->data);
 }
 
-void odometryCallback(const geometry_msgs::QuaternionStamped::ConstPtr& att, const sensor_msgs::NavSatFix::ConstPtr& pos){
-    delayMessage::DelayMsg delaymsg;
+void odometryCallback(const geometry_msgs::QuaternionStamped::ConstPtr& att, const sensor_msgs::NavSatFix::ConstPtr& pos){  
     delaymsg.set_uav_id(uavIndex);
 
     // set header
     delaymsg.set_msg_id(pos->header.seq);
-    delaymsg.set_send_time(att->header.seq);
-    // delaymsg.set_send_time(pos->header.stamp.toSec());
+    delaymsg.set_send_time(ros::Time::now().toSec());
     delaymsg.set_str(pos->header.frame_id);
 
     // set attitude
@@ -114,17 +96,15 @@ int main(int argc, char** argv)
     //     return -1;
     // }
 
-    ros::Subscriber stateSub = nh.subscribe("status_msg",10,&state_callback);
+    ros::Subscriber healthSub = nh.subscribe("GPS_health",10,&health_callback);
     message_filters::Subscriber<geometry_msgs::QuaternionStamped> attitude_sub(nh, "attitude", 1);
     message_filters::Subscriber<sensor_msgs::NavSatFix> position_sub(nh, "GPS_position", 1);
 
     typedef message_filters::sync_policies::ApproximateTime<geometry_msgs::QuaternionStamped, sensor_msgs::NavSatFix> MySyncPolicy;
     message_filters::Synchronizer<MySyncPolicy> sync(MySyncPolicy(10), attitude_sub, position_sub);
-//    TimeSynchronizer<geometry_msgs::QuaternionStamped, sensor_msgs::NavSatFix> sync(attitude_sub, position_sub, 10);
     sync.registerCallback(boost::bind(&odometryCallback, _1, _2));
 
-    // delayMessage::DelayMsg delaymsg;
-    ros::Rate loop_rate(50);
+    ros::Rate loop_rate(1);
     
     while(ros::ok()){
         ros::spinOnce();
