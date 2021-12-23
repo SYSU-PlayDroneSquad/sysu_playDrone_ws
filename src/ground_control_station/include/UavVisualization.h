@@ -1,5 +1,5 @@
-#ifndef SRC_UAV_VISUALIZATION_H
-#define SRC_UAV_VISUALIZATION_H
+#ifndef SRC_UAVVISUALIZATION_H
+#define SRC_UAVVISUALIZATION_H
 
 // ros include
 #include <ros/ros.h>
@@ -33,7 +33,6 @@ private:
     double _arm_length;                  // 无人机臂长
     string _shape_frame;                 // 机架类型
     static double _setp_angle;           // 螺旋桨步进角度
-    static bool _set_local_position_ref; // 本地原点设置判断
     double _roll, _pitch, _yaw;          // 机体坐标系到 ENU 坐标系的姿态角变换
     static geometry_msgs::QuaternionStamped _uav_attitude;
     visualization_msgs::MarkerArray  _uav_marker_msg; // 无人机显示消息
@@ -66,28 +65,6 @@ public:
         _uav_attitude.quaternion = attitude.quaternion;
     }
 
-    // GPS 坐标转局部 ENU 坐标
-    void gpsToenu(const boost::shared_ptr<const sensor_msgs::NavSatFix>& gps_position){
-        double latitude, longitude, altitude;
-        latitude = gps_position->latitude;
-        longitude = gps_position->longitude;
-        altitude = gps_position->altitude;
-        // 设置本地坐标系原点
-        set_local_position(latitude, longitude, altitude);
-
-        // 计算当前 gps 坐标对应的本地坐标
-        gps2enu.Forward(latitude, longitude, altitude, _local_E, _local_N, _local_U);
-        // cout << _local_E << " " << _local_N << " " << _local_U << endl << endl;
-
-    }
-
-    // 设置本地坐标系原点
-    void set_local_position(double &latitude, double &longitude, double &altitude){
-        if(!_set_local_position_ref){
-            gps2enu.Reset(latitude, longitude, altitude);
-            _set_local_position_ref = true;
-        }
-    }
 
     // 获取螺旋桨的位置
     void get_propeller_pos(geometry_msgs::Pose drone_pose, geometry_msgs::Pose propeller_pose){
@@ -240,11 +217,10 @@ public:
 
 };
 GeographicLib::LocalCartesian UavMarker::gps2enu;
-bool UavMarker::_set_local_position_ref = false;
 double UavMarker::_local_E = 0;
 double UavMarker::_local_N = 0;
 double UavMarker::_local_U = 0;
 double UavMarker::_setp_angle = 0;
 geometry_msgs::QuaternionStamped UavMarker::_uav_attitude;
 
-#endif //SRC_UAV_VISUALIZATION_H
+#endif //SRC_UAVVISUALIZATION_H

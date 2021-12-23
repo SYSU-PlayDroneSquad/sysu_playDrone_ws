@@ -5,7 +5,6 @@ find_package(catkin REQUIRED COMPONENTS
         roscpp
         rospy
         std_msgs
-        hector_uav_msgs
         geometry_msgs
         dji_sdk         # dji sdk
         image_transport # 融合多topic数据
@@ -65,10 +64,15 @@ add_library(
         src/uav_status_update.cpp
 )
 
+add_library(
+        ground_control_station_lib
+        include/GroundControlStation.h
+        src/ground_control_station.cpp
+)
+
 
 add_executable(simulation_control_station src/simulation_control_station.cpp)
 target_link_libraries(simulation_control_station simulation_control_station_lib ${catkin_LIBRARIES})
-add_dependencies(simulation_control_station hector_uav_msgs_generate_messages_cpp)
 
 add_executable(command_parser src/command_parser.cpp)
 target_link_libraries(command_parser command_parser_lib ${catkin_LIBRARIES} ${DJIOSDK_LIBRARIES})
@@ -80,7 +84,7 @@ add_executable(simulation_position_fusion src/simulation_position_fusion.cpp)
 target_link_libraries(simulation_position_fusion  ${catkin_LIBRARIES})
 
 add_executable(ground_control_station src/ground_control_station.cpp)
-target_link_libraries(ground_control_station  ${catkin_LIBRARIES} ${GeographicLib_LIBRARIES})
+target_link_libraries(ground_control_station  ground_control_station_lib ${catkin_LIBRARIES} ${GeographicLib_LIBRARIES})
 
 
 

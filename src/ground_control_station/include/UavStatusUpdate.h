@@ -18,16 +18,17 @@ using std::setw;
 
 class UavStatusUpdate{
 public:
-    UavStatusUpdate(const ros::NodeHandle& nh, int uavNum) {
+    UavStatusUpdate() = default;
+    UavStatusUpdate(const ros::NodeHandle& nh, int uavNumbers) {
         // ros句柄
         _nh = nh;
-        _uavNum = uavNum;
+        _uavNumbers = uavNumbers;
         _full = false;
     }
 
     ~UavStatusUpdate()= default;
 
-    void data_handing(const string& data){
+    void data_handing(const string& data){ // data: uav1#5
         push_uavName(data);
         push_item(data);
         output();
@@ -38,7 +39,7 @@ public:
         if(!_full){
             // 检查 _status[] 空缺的uavName个数
             int empty = 0;
-            for(int i = 0; i < _uavNum; i++){
+            for(int i = 0; i < _uavNumbers; i++){
                 if(_status[i][0].empty()){
                     ++empty;
                 }
@@ -46,7 +47,7 @@ public:
             string uavName = data.substr(0, data.find('v') + 1) + " "
                     + data.substr(data.find('v') + 1, data.find('#') - data.find('v') - 1);
             if(empty && !storage(uavName, empty)){
-                _status[_uavNum - empty][0] = uavName;
+                _status[_uavNumbers - empty][0] = uavName;
                 --empty;
                 // cout << "empty2 = " << empty << endl;
                 if(empty == 0){
@@ -60,8 +61,8 @@ public:
 
     // 检查该 uavName 是否存储
     bool storage(const string& uavName, int empty) const{
-        for(int i = 0; i < _uavNum - empty; i++){
-            if(_uavNum == empty){
+        for(int i = 0; i < _uavNumbers - empty; i++){
+            if(_uavNumbers == empty){
                 return false;
             } else if(_status[i][0] == uavName){
                 return true;
@@ -73,7 +74,7 @@ public:
     // 对 _status 里的 uavName 升序排序
     void sort(int empty) const{
         string tmp;
-        int exist = _uavNum - empty;
+        int exist = _uavNumbers - empty;
         for(int i = exist - 1; i >= 1; i--){
             if(_status[i][0] < _status[i - 1][0]){
                 tmp = _status[i][0];
@@ -108,7 +109,7 @@ public:
             case 0: icon_gps = "\33[31m✖\33[0m"; break;
             default: icon_gps = "???";    break;
         }
-        for(int i = 0; i < _uavNum; i++){
+        for(int i = 0; i < _uavNumbers; i++){
             if(uavName == _status[i][0]){
                 _status[i][2] = icon_gps;
                 int count = atoi(_status[i][1].c_str());
@@ -131,7 +132,7 @@ public:
         }
 
         int empty = 0;
-        for(int i = 0; i < _uavNum; i++){
+        for(int i = 0; i < _uavNumbers; i++){
             if(!_status[i][0].empty()){
                 cout << left << setw(13) << _status[i][0] << _status[i][2] << endl;
             } else {
@@ -145,7 +146,7 @@ public:
 
     // 检查链接通断
     void check_status_CB(const ros::TimerEvent &event) const{
-        for(int i = 0; i < _uavNum; i++){
+        for(int i = 0; i < _uavNumbers; i++){
             if(!_status[i][0].empty()){
                 if(_status[i][1] < "3"){
                     _status[i][2] = "\33[31mLink down!\33[0m";
@@ -161,8 +162,8 @@ public:
 
 private:
     ros::NodeHandle _nh;
-    int _uavNum;
-    bool _full;
+    int _uavNumbers{};
+    bool _full{};
     static int _flash;
 };
 
