@@ -55,6 +55,7 @@ void assignStatus() {
 
     status.seq = seq[delaymsg.uav_id()] + 1;
     seq[delaymsg.uav_id()] = status.seq;
+    status.id = delaymsg.uav_id();
 
 }
 
@@ -112,7 +113,7 @@ int main(int argc, char **argv)
                 ROS_INFO("The latitude: %f, the longitude: %f, the altitude: %f", status.latitude, status.longitude, status.altitude);
                 ROS_INFO("The x: %f, the y: %f, the z: %f, the w: %f", status.quaternion.x, status.quaternion.y, status.quaternion.z, status.quaternion.w);
 
-                statusarr[i] = status;
+                statusarr[status.id - 1] = status;
             }
         }  
 
