@@ -105,7 +105,7 @@ int main(int argc, char** argv)
     message_filters::Synchronizer<MySyncPolicy> sync(MySyncPolicy(10), attitude_sub, position_sub);
     sync.registerCallback(boost::bind(&odometryCallback, _1, _2));
 
-    ros::Rate loop_rate(1);
+    ros::Rate loop_rate(50);
     
     while(ros::ok()){
         ros::spinOnce();
