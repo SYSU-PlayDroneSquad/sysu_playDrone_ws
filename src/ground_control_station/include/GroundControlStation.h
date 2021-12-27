@@ -9,6 +9,7 @@
 #include "ground_control_station/StatusArray.h"
 #include "ground_control_station/Array3.h"
 #include "UavStatusUpdate.h"
+#include "UavVisualization.h"
 
 using std::cout;
 using std::endl;
@@ -24,13 +25,16 @@ private:
     int _uavNumbers;
 
     UavStatusUpdate uavStatusUpdate;
+    ground_control_station::Array3 _pos_arr;
+    vector<UavMarker> _uav_marker_array;
+
 
     ros::Publisher _pos_pub;
     ros::Subscriber _status_sub;
 
     double _longitude{}, _latitude{}, _altitude{};
     double _pos_x, _pos_y, _pos_z;
-    ground_control_station::Array3 _pos_arr;
+
     GeographicLib::LocalCartesian gps2enu;     // 调用 GeographicLib 库，转换 gps 坐标
     bool _set_local_position_ref{};
 
@@ -40,6 +44,7 @@ public:
                          double latitude, double longitude, double altitude){
         _nh = nh;
         _uavNumbers = uavNumbers;
+
         // status 初始化
         UavStatusUpdate tmp(_nh, _uavNumbers);
         UavStatusUpdate::_status.resize(_uavNumbers);
@@ -48,12 +53,15 @@ public:
         }
         uavStatusUpdate = tmp;
 
+        //uav marker 初始化
+        _uav_marker_array.resize(_uavNumbers);
+
         // 设置原点
         gps2enu.Reset(latitude, longitude, altitude);
         // ros
         _pos_pub = _nh.advertise<ground_control_station::Array3>("/position_list", 10);
-        _status_sub = _nh.subscribe("/abc", 1, &GroundControlStation::status_sub_cb, this);
-
+        _status_sub = _nh.subscribe("/UAVs/status", 10, &GroundControlStation::status_sub_cb, this);
+        // 位置
         _pos_x = _pos_y = _pos_z = 0;
         _pos_arr.x.resize(_uavNumbers); _pos_arr.y.resize(_uavNumbers); _pos_arr.z.resize(_uavNumbers);
     }
@@ -63,7 +71,7 @@ public:
     // 无人机状态回调
     void status_sub_cb(const ground_control_station::StatusArray& status){
         location_release(status); // 位置发布
-        lv_gps_print(status);
+        lv_gps_print(status);     // gps 姿态发布
     }
 
     // 位置发布
@@ -75,6 +83,8 @@ public:
             // 计算当前 gps 坐标对应的本地坐标
             gps2enu.Forward(_latitude, _longitude, _altitude, _pos_x, _pos_y, _pos_z);
             _pos_arr.x[i] = _pos_x; _pos_arr.y[i] = _pos_y; _pos_arr.z[i] = _pos_z;
+            // 可视化
+            _uav_marker_array[i].handing(_pos_x, _pos_y, _pos_z, status.StatusArray[i].quaternion);
         }
         _pos_pub.publish(_pos_arr);
     }
@@ -83,12 +93,15 @@ public:
     void lv_gps_print(const ground_control_station::StatusArray &status){
         std::string data("uavx#0");
         for(int i(0); i < _uavNumbers; i++){
-            data[3] = status.StatusArray[i].id + '0';
-            data[5] = status.StatusArray[i].lv_gps + '0';
-            uavStatusUpdate.data_handing(data);
+            if(status.StatusArray[i].id != 0){
+                data[3] = status.StatusArray[i].id + '0';
+                data[5] = status.StatusArray[i].lv_gps + '0';
+                uavStatusUpdate.data_handing(data);
+            }
         }
-
     }
+
+
 
 };
 
