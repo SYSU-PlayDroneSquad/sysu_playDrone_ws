@@ -8,6 +8,10 @@
 //#include "../include/delay/delay.pb.cc"
 #include "../include/cloud_server_communication/config.h"
 #include <std_msgs/String.h>
+
+#include "ground_control_station/Array3.h"
+#include <typeinfo> 
+
 using namespace std;
 
 void* ctx = zmq_ctx_new();
@@ -15,6 +19,8 @@ void* subscriber = zmq_socket(ctx, ZMQ_SUB);
 vector<void*> subscriberList = vector<void*>(51, zmq_socket(ctx, ZMQ_SUB));
 string uavName("uav");
 int numUav;
+
+ros::Time stamp;
 
 int main(int argc, char **argv)
 {
@@ -25,6 +31,7 @@ int main(int argc, char **argv)
     delayMessage::DelayMsg delaymsg;
 
     ros::Publisher cmd_pub = nh.advertise<std_msgs::String>("key", 1000);
+    ros::Publisher vel_cmd_pub = nh.advertise<ground_control_station::Array3>("vel_cmd", 1000);
 
     for(int i=0;i<=numUav;++i){
         if(0==zmq_connect(subscriberList[i], sub_addr_list[i])){
@@ -61,10 +68,34 @@ int main(int argc, char **argv)
                 delaymsg.ParseFromString(str);
                 if (delaymsg.uav_id() == 0)
                 {
-                    ROS_INFO("%s subscribe: %s", uavName.c_str(), delaymsg.cmd().c_str());
-                    std_msgs::String msg;
-                    msg.data = delaymsg.cmd();
-                    cmd_pub.publish(msg);
+                    if (delaymsg.is_from_keyboard())
+                    {
+                        ROS_INFO("%s subscribe: %s", uavName.c_str(), delaymsg.cmd().c_str());
+                        std_msgs::String msg;
+                        msg.data = delaymsg.cmd();
+                        cmd_pub.publish(msg);
+                    }
+                    else
+                    {
+                        ground_control_station::Array3 vel;
+
+                        stamp.sec = delaymsg.send_time();
+                        // Assign header
+                        vel.header.seq      = delaymsg.msg_id();
+                        vel.header.stamp    = stamp;
+                        vel.header.frame_id = delaymsg.str();
+
+                        int size = delaymsg.vl_x_size();
+                        for (int j = 0; j < size; j++)
+                        {
+                            vel.x.push_back(delaymsg.vl_x(j));
+                            vel.y.push_back(delaymsg.vl_y(j));
+                            vel.z.push_back(delaymsg.vl_z(j));
+                        }
+                        ROS_INFO("%s subscribe velocity commands successfully.", uavName.c_str());
+
+                        vel_cmd_pub.publish(vel);
+                    }
                 }
                 else
                 {

@@ -9,6 +9,9 @@
 #include <nav_msgs/Odometry.h>
 #include "../include/cloud_server_communication/config.h"
 #include <std_msgs/String.h>
+
+#include "ground_control_station/Array3.h"
+
 using namespace std;
 
 void* ctx = zmq_ctx_new();
@@ -27,7 +30,6 @@ int sendMsg(delayMessage::DelayMsg delaymsg){
 
     //发送zmq_msg_t
     int send_byte = zmq_msg_send(&send_msg,client,0);
-    ROS_INFO("uavIndex: %d", uavIndex);
     ROS_INFO("Ground station client send message (%d bytes) success.",send_byte);
     zmq_msg_close(&send_msg);
 
@@ -42,6 +44,7 @@ void key_callback(const std_msgs::String::ConstPtr& msg){
     ROS_INFO("Send: %s", msg->data.c_str());
 
     delayMessage::DelayMsg delaymsg;
+    delaymsg.set_is_from_keyboard(true);
     delaymsg.set_uav_id(uavIndex);
     delaymsg.set_send_time(ros::Time::now().toSec());
     delaymsg.set_cmd(msg->data.c_str());
@@ -51,10 +54,33 @@ void key_callback(const std_msgs::String::ConstPtr& msg){
     sendMsg(delaymsg);
 }
 
+void vel_list_callback(const ground_control_station::Array3::ConstPtr& vel){
+    ROS_INFO("Send velocity commands successfully.");
+
+    delayMessage::DelayMsg delaymsg;
+    delaymsg.set_is_from_keyboard(false);
+    delaymsg.set_uav_id(uavIndex);
+
+    // set header
+    delaymsg.set_msg_id(vel->header.seq);
+    delaymsg.set_send_time(ros::Time::now().toSec());
+    delaymsg.set_str(vel->header.frame_id);
+
+    // set velocity
+    int size = vel->x.size();
+    for (int i = 0; i < size; i++)
+    {
+        delaymsg.add_vl_x(vel->x[i]);
+        delaymsg.add_vl_y(vel->y[i]);
+        delaymsg.add_vl_z(vel->z[i]);
+    }
+
+    sendMsg(delaymsg);
+}
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "client_node");
+    ros::init(argc, argv, "ground_node");
     ros::NodeHandle nh;
 
     ros::param::get("~uav_name", uavName);
@@ -82,8 +108,8 @@ int main(int argc, char** argv)
     // }
 
     ros::Subscriber keySub = nh.subscribe("key",10,&key_callback);
+    ros::Subscriber velSub = nh.subscribe("vel_list", 1, &vel_list_callback);
 
-    delayMessage::DelayMsg delaymsg;
     ros::Rate loop_rate(100);
 
     ros::spin();

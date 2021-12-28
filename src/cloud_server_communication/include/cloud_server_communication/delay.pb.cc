@@ -36,7 +36,7 @@ void protobuf_AssignDesc_delay_2eproto() {
       "delay.proto");
   GOOGLE_CHECK(file != NULL);
   DelayMsg_descriptor_ = file->message_type(0);
-  static const int DelayMsg_offsets_[18] = {
+  static const int DelayMsg_offsets_[20] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, cmd_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, str_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, msg_id_),
@@ -53,8 +53,10 @@ void protobuf_AssignDesc_delay_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, z_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, w_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, gps_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, state_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, ct_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, is_from_keyboard_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, vl_x_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, vl_y_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, vl_z_),
   };
   DelayMsg_reflection_ =
     ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
@@ -99,14 +101,15 @@ void protobuf_AddDesc_delay_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\013delay.proto\022\014delayMessage\"\366\001\n\010DelayMsg"
+    "\n\013delay.proto\022\014delayMessage\"\237\002\n\010DelayMsg"
     "\022\013\n\003cmd\030d \001(\t\022\013\n\003str\030e \001(\t\022\016\n\006msg_id\030\001 \001"
     "(\r\022\021\n\tsend_time\030\002 \001(\001\022\016\n\006uav_id\030\003 \001(\r\022\013\n"
     "\003lat\030\004 \001(\001\022\013\n\003lon\030\005 \001(\001\022\013\n\003alt\030\006 \001(\001\022\n\n\002"
     "vx\030\007 \001(\001\022\n\n\002vy\030\010 \001(\001\022\n\n\002vz\030\t \001(\001\022\t\n\001x\030\n "
     "\001(\001\022\t\n\001y\030\013 \001(\001\022\t\n\001z\030\014 \001(\001\022\t\n\001w\030\r \001(\001\022\013\n\003"
-    "gps\030\016 \001(\r\022\r\n\005state\030\023 \003(\r\022\n\n\002ct\030\024 \003(\001b\006pr"
-    "oto3", 284);
+    "gps\030\016 \001(\r\022\030\n\020is_from_keyboard\030\017 \001(\010\022\014\n\004v"
+    "l_x\030\025 \003(\001\022\014\n\004vl_y\030\026 \003(\001\022\014\n\004vl_z\030\027 \003(\001b\006p"
+    "roto3", 325);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "delay.proto", &protobuf_RegisterTypes);
   DelayMsg::default_instance_ = new DelayMsg();
@@ -140,8 +143,10 @@ const int DelayMsg::kYFieldNumber;
 const int DelayMsg::kZFieldNumber;
 const int DelayMsg::kWFieldNumber;
 const int DelayMsg::kGpsFieldNumber;
-const int DelayMsg::kStateFieldNumber;
-const int DelayMsg::kCtFieldNumber;
+const int DelayMsg::kIsFromKeyboardFieldNumber;
+const int DelayMsg::kVlXFieldNumber;
+const int DelayMsg::kVlYFieldNumber;
+const int DelayMsg::kVlZFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
 DelayMsg::DelayMsg()
@@ -182,6 +187,7 @@ void DelayMsg::SharedCtor() {
   z_ = 0;
   w_ = 0;
   gps_ = 0u;
+  is_from_keyboard_ = false;
 }
 
 DelayMsg::~DelayMsg() {
@@ -242,14 +248,15 @@ void DelayMsg::Clear() {
   ZR_(send_time_, alt_);
   cmd_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   str_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  ZR_(vx_, w_);
-  gps_ = 0u;
+  ZR_(vx_, gps_);
+  is_from_keyboard_ = false;
 
 #undef ZR_HELPER_
 #undef ZR_
 
-  state_.Clear();
-  ct_.Clear();
+  vl_x_.Clear();
+  vl_y_.Clear();
+  vl_z_.Clear();
 }
 
 bool DelayMsg::MergePartialFromCodedStream(
@@ -467,39 +474,72 @@ bool DelayMsg::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(154)) goto parse_state;
+        if (input->ExpectTag(120)) goto parse_is_from_keyboard;
         break;
       }
 
-      // repeated uint32 state = 19;
-      case 19: {
-        if (tag == 154) {
-         parse_state:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPackedPrimitive<
-                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 input, this->mutable_state())));
-        } else if (tag == 152) {
-          DO_((::google::protobuf::internal::WireFormatLite::ReadRepeatedPrimitiveNoInline<
-                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 2, 154, input, this->mutable_state())));
+      // optional bool is_from_keyboard = 15;
+      case 15: {
+        if (tag == 120) {
+         parse_is_from_keyboard:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &is_from_keyboard_)));
+
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(162)) goto parse_ct;
+        if (input->ExpectTag(170)) goto parse_vl_x;
         break;
       }
 
-      // repeated double ct = 20;
-      case 20: {
-        if (tag == 162) {
-         parse_ct:
+      // repeated double vl_x = 21;
+      case 21: {
+        if (tag == 170) {
+         parse_vl_x:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPackedPrimitive<
                    double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
-                 input, this->mutable_ct())));
-        } else if (tag == 161) {
+                 input, this->mutable_vl_x())));
+        } else if (tag == 169) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadRepeatedPrimitiveNoInline<
                    double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
-                 2, 162, input, this->mutable_ct())));
+                 2, 170, input, this->mutable_vl_x())));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(178)) goto parse_vl_y;
+        break;
+      }
+
+      // repeated double vl_y = 22;
+      case 22: {
+        if (tag == 178) {
+         parse_vl_y:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPackedPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, this->mutable_vl_y())));
+        } else if (tag == 177) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadRepeatedPrimitiveNoInline<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 2, 178, input, this->mutable_vl_y())));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(186)) goto parse_vl_z;
+        break;
+      }
+
+      // repeated double vl_z = 23;
+      case 23: {
+        if (tag == 186) {
+         parse_vl_z:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPackedPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, this->mutable_vl_z())));
+        } else if (tag == 185) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadRepeatedPrimitiveNoInline<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 2, 186, input, this->mutable_vl_z())));
         } else {
           goto handle_unusual;
         }
@@ -635,24 +675,39 @@ void DelayMsg::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(14, this->gps(), output);
   }
 
-  // repeated uint32 state = 19;
-  if (this->state_size() > 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteTag(19, ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED, output);
-    output->WriteVarint32(_state_cached_byte_size_);
-  }
-  for (int i = 0; i < this->state_size(); i++) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32NoTag(
-      this->state(i), output);
+  // optional bool is_from_keyboard = 15;
+  if (this->is_from_keyboard() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(15, this->is_from_keyboard(), output);
   }
 
-  // repeated double ct = 20;
-  if (this->ct_size() > 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteTag(20, ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED, output);
-    output->WriteVarint32(_ct_cached_byte_size_);
+  // repeated double vl_x = 21;
+  if (this->vl_x_size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteTag(21, ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED, output);
+    output->WriteVarint32(_vl_x_cached_byte_size_);
   }
-  for (int i = 0; i < this->ct_size(); i++) {
+  for (int i = 0; i < this->vl_x_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteDoubleNoTag(
-      this->ct(i), output);
+      this->vl_x(i), output);
+  }
+
+  // repeated double vl_y = 22;
+  if (this->vl_y_size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteTag(22, ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED, output);
+    output->WriteVarint32(_vl_y_cached_byte_size_);
+  }
+  for (int i = 0; i < this->vl_y_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteDoubleNoTag(
+      this->vl_y(i), output);
+  }
+
+  // repeated double vl_z = 23;
+  if (this->vl_z_size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteTag(23, ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED, output);
+    output->WriteVarint32(_vl_z_cached_byte_size_);
+  }
+  for (int i = 0; i < this->vl_z_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteDoubleNoTag(
+      this->vl_z(i), output);
   }
 
   // optional string cmd = 100;
@@ -751,32 +806,51 @@ void DelayMsg::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(14, this->gps(), target);
   }
 
-  // repeated uint32 state = 19;
-  if (this->state_size() > 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteTagToArray(
-      19,
-      ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED,
-      target);
-    target = ::google::protobuf::io::CodedOutputStream::WriteVarint32ToArray(
-      _state_cached_byte_size_, target);
-  }
-  for (int i = 0; i < this->state_size(); i++) {
-    target = ::google::protobuf::internal::WireFormatLite::
-      WriteUInt32NoTagToArray(this->state(i), target);
+  // optional bool is_from_keyboard = 15;
+  if (this->is_from_keyboard() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(15, this->is_from_keyboard(), target);
   }
 
-  // repeated double ct = 20;
-  if (this->ct_size() > 0) {
+  // repeated double vl_x = 21;
+  if (this->vl_x_size() > 0) {
     target = ::google::protobuf::internal::WireFormatLite::WriteTagToArray(
-      20,
+      21,
       ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED,
       target);
     target = ::google::protobuf::io::CodedOutputStream::WriteVarint32ToArray(
-      _ct_cached_byte_size_, target);
+      _vl_x_cached_byte_size_, target);
   }
-  for (int i = 0; i < this->ct_size(); i++) {
+  for (int i = 0; i < this->vl_x_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
-      WriteDoubleNoTagToArray(this->ct(i), target);
+      WriteDoubleNoTagToArray(this->vl_x(i), target);
+  }
+
+  // repeated double vl_y = 22;
+  if (this->vl_y_size() > 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteTagToArray(
+      22,
+      ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED,
+      target);
+    target = ::google::protobuf::io::CodedOutputStream::WriteVarint32ToArray(
+      _vl_y_cached_byte_size_, target);
+  }
+  for (int i = 0; i < this->vl_y_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteDoubleNoTagToArray(this->vl_y(i), target);
+  }
+
+  // repeated double vl_z = 23;
+  if (this->vl_z_size() > 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteTagToArray(
+      23,
+      ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED,
+      target);
+    target = ::google::protobuf::io::CodedOutputStream::WriteVarint32ToArray(
+      _vl_z_cached_byte_size_, target);
+  }
+  for (int i = 0; i < this->vl_z_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteDoubleNoTagToArray(this->vl_z(i), target);
   }
 
   // optional string cmd = 100;
@@ -899,33 +973,49 @@ int DelayMsg::ByteSize() const {
         this->gps());
   }
 
-  // repeated uint32 state = 19;
+  // optional bool is_from_keyboard = 15;
+  if (this->is_from_keyboard() != 0) {
+    total_size += 1 + 1;
+  }
+
+  // repeated double vl_x = 21;
   {
     int data_size = 0;
-    for (int i = 0; i < this->state_size(); i++) {
-      data_size += ::google::protobuf::internal::WireFormatLite::
-        UInt32Size(this->state(i));
-    }
+    data_size = 8 * this->vl_x_size();
     if (data_size > 0) {
       total_size += 2 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(data_size);
     }
     GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
-    _state_cached_byte_size_ = data_size;
+    _vl_x_cached_byte_size_ = data_size;
     GOOGLE_SAFE_CONCURRENT_WRITES_END();
     total_size += data_size;
   }
 
-  // repeated double ct = 20;
+  // repeated double vl_y = 22;
   {
     int data_size = 0;
-    data_size = 8 * this->ct_size();
+    data_size = 8 * this->vl_y_size();
     if (data_size > 0) {
       total_size += 2 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(data_size);
     }
     GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
-    _ct_cached_byte_size_ = data_size;
+    _vl_y_cached_byte_size_ = data_size;
+    GOOGLE_SAFE_CONCURRENT_WRITES_END();
+    total_size += data_size;
+  }
+
+  // repeated double vl_z = 23;
+  {
+    int data_size = 0;
+    data_size = 8 * this->vl_z_size();
+    if (data_size > 0) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(data_size);
+    }
+    GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+    _vl_z_cached_byte_size_ = data_size;
     GOOGLE_SAFE_CONCURRENT_WRITES_END();
     total_size += data_size;
   }
@@ -958,8 +1048,9 @@ void DelayMsg::MergeFrom(const DelayMsg& from) {
   if (GOOGLE_PREDICT_FALSE(&from == this)) {
     ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
   }
-  state_.MergeFrom(from.state_);
-  ct_.MergeFrom(from.ct_);
+  vl_x_.MergeFrom(from.vl_x_);
+  vl_y_.MergeFrom(from.vl_y_);
+  vl_z_.MergeFrom(from.vl_z_);
   if (from.cmd().size() > 0) {
 
     cmd_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.cmd_);
@@ -1010,6 +1101,9 @@ void DelayMsg::MergeFrom(const DelayMsg& from) {
   if (from.gps() != 0) {
     set_gps(from.gps());
   }
+  if (from.is_from_keyboard() != 0) {
+    set_is_from_keyboard(from.is_from_keyboard());
+  }
 }
 
 void DelayMsg::CopyFrom(const ::google::protobuf::Message& from) {
@@ -1052,8 +1146,10 @@ void DelayMsg::InternalSwap(DelayMsg* other) {
   std::swap(z_, other->z_);
   std::swap(w_, other->w_);
   std::swap(gps_, other->gps_);
-  state_.UnsafeArenaSwap(&other->state_);
-  ct_.UnsafeArenaSwap(&other->ct_);
+  std::swap(is_from_keyboard_, other->is_from_keyboard_);
+  vl_x_.UnsafeArenaSwap(&other->vl_x_);
+  vl_y_.UnsafeArenaSwap(&other->vl_y_);
+  vl_z_.UnsafeArenaSwap(&other->vl_z_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   std::swap(_cached_size_, other->_cached_size_);
 }
@@ -1353,64 +1449,108 @@ void DelayMsg::clear_gps() {
   // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.gps)
 }
 
-// repeated uint32 state = 19;
-int DelayMsg::state_size() const {
-  return state_.size();
+// optional bool is_from_keyboard = 15;
+void DelayMsg::clear_is_from_keyboard() {
+  is_from_keyboard_ = false;
 }
-void DelayMsg::clear_state() {
-  state_.Clear();
+ bool DelayMsg::is_from_keyboard() const {
+  // @@protoc_insertion_point(field_get:delayMessage.DelayMsg.is_from_keyboard)
+  return is_from_keyboard_;
 }
- ::google::protobuf::uint32 DelayMsg::state(int index) const {
-  // @@protoc_insertion_point(field_get:delayMessage.DelayMsg.state)
-  return state_.Get(index);
-}
- void DelayMsg::set_state(int index, ::google::protobuf::uint32 value) {
-  state_.Set(index, value);
-  // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.state)
-}
- void DelayMsg::add_state(::google::protobuf::uint32 value) {
-  state_.Add(value);
-  // @@protoc_insertion_point(field_add:delayMessage.DelayMsg.state)
-}
- const ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >&
-DelayMsg::state() const {
-  // @@protoc_insertion_point(field_list:delayMessage.DelayMsg.state)
-  return state_;
-}
- ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >*
-DelayMsg::mutable_state() {
-  // @@protoc_insertion_point(field_mutable_list:delayMessage.DelayMsg.state)
-  return &state_;
+ void DelayMsg::set_is_from_keyboard(bool value) {
+  
+  is_from_keyboard_ = value;
+  // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.is_from_keyboard)
 }
 
-// repeated double ct = 20;
-int DelayMsg::ct_size() const {
-  return ct_.size();
+// repeated double vl_x = 21;
+int DelayMsg::vl_x_size() const {
+  return vl_x_.size();
 }
-void DelayMsg::clear_ct() {
-  ct_.Clear();
+void DelayMsg::clear_vl_x() {
+  vl_x_.Clear();
 }
- double DelayMsg::ct(int index) const {
-  // @@protoc_insertion_point(field_get:delayMessage.DelayMsg.ct)
-  return ct_.Get(index);
+ double DelayMsg::vl_x(int index) const {
+  // @@protoc_insertion_point(field_get:delayMessage.DelayMsg.vl_x)
+  return vl_x_.Get(index);
 }
- void DelayMsg::set_ct(int index, double value) {
-  ct_.Set(index, value);
-  // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.ct)
+ void DelayMsg::set_vl_x(int index, double value) {
+  vl_x_.Set(index, value);
+  // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.vl_x)
 }
- void DelayMsg::add_ct(double value) {
-  ct_.Add(value);
-  // @@protoc_insertion_point(field_add:delayMessage.DelayMsg.ct)
+ void DelayMsg::add_vl_x(double value) {
+  vl_x_.Add(value);
+  // @@protoc_insertion_point(field_add:delayMessage.DelayMsg.vl_x)
 }
  const ::google::protobuf::RepeatedField< double >&
-DelayMsg::ct() const {
-  // @@protoc_insertion_point(field_list:delayMessage.DelayMsg.ct)
-  return ct_;
+DelayMsg::vl_x() const {
+  // @@protoc_insertion_point(field_list:delayMessage.DelayMsg.vl_x)
+  return vl_x_;
 }
  ::google::protobuf::RepeatedField< double >*
-DelayMsg::mutable_ct() {
-  // @@protoc_insertion_point(field_mutable_list:delayMessage.DelayMsg.ct)
-  return &ct_;
+DelayMsg::mutable_vl_x() {
+  // @@protoc_insertion_point(field_mutable_list:delayMessage.DelayMsg.vl_x)
+  return &vl_x_;
+}
+
+// repeated double vl_y = 22;
+int DelayMsg::vl_y_size() const {
+  return vl_y_.size();
+}
+void DelayMsg::clear_vl_y() {
+  vl_y_.Clear();
+}
+ double DelayMsg::vl_y(int index) const {
+  // @@protoc_insertion_point(field_get:delayMessage.DelayMsg.vl_y)
+  return vl_y_.Get(index);
+}
+ void DelayMsg::set_vl_y(int index, double value) {
+  vl_y_.Set(index, value);
+  // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.vl_y)
+}
+ void DelayMsg::add_vl_y(double value) {
+  vl_y_.Add(value);
+  // @@protoc_insertion_point(field_add:delayMessage.DelayMsg.vl_y)
+}
+ const ::google::protobuf::RepeatedField< double >&
+DelayMsg::vl_y() const {
+  // @@protoc_insertion_point(field_list:delayMessage.DelayMsg.vl_y)
+  return vl_y_;
+}
+ ::google::protobuf::RepeatedField< double >*
+DelayMsg::mutable_vl_y() {
+  // @@protoc_insertion_point(field_mutable_list:delayMessage.DelayMsg.vl_y)
+  return &vl_y_;
+}
+
+// repeated double vl_z = 23;
+int DelayMsg::vl_z_size() const {
+  return vl_z_.size();
+}
+void DelayMsg::clear_vl_z() {
+  vl_z_.Clear();
+}
+ double DelayMsg::vl_z(int index) const {
+  // @@protoc_insertion_point(field_get:delayMessage.DelayMsg.vl_z)
+  return vl_z_.Get(index);
+}
+ void DelayMsg::set_vl_z(int index, double value) {
+  vl_z_.Set(index, value);
+  // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.vl_z)
+}
+ void DelayMsg::add_vl_z(double value) {
+  vl_z_.Add(value);
+  // @@protoc_insertion_point(field_add:delayMessage.DelayMsg.vl_z)
+}
+ const ::google::protobuf::RepeatedField< double >&
+DelayMsg::vl_z() const {
+  // @@protoc_insertion_point(field_list:delayMessage.DelayMsg.vl_z)
+  return vl_z_;
+}
+ ::google::protobuf::RepeatedField< double >*
+DelayMsg::mutable_vl_z() {
+  // @@protoc_insertion_point(field_mutable_list:delayMessage.DelayMsg.vl_z)
+  return &vl_z_;
 }
 
 #endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
