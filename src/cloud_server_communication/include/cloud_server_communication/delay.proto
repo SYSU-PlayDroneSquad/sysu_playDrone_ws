@@ -25,8 +25,11 @@ message DelayMsg
     // set GPS_health
     uint32 gps = 14;
 
-    repeated uint32 state = 19;
-    repeated double ct = 20;
+    bool is_from_keyboard = 15;
+
+    repeated double vl_x = 21;
+    repeated double vl_y = 22;
+    repeated double vl_z = 23;
 }
 
 

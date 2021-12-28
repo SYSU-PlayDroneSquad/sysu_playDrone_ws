@@ -206,29 +206,47 @@ class DelayMsg : public ::google::protobuf::Message /* @@protoc_insertion_point(
   ::google::protobuf::uint32 gps() const;
   void set_gps(::google::protobuf::uint32 value);
 
-  // repeated uint32 state = 19;
-  int state_size() const;
-  void clear_state();
-  static const int kStateFieldNumber = 19;
-  ::google::protobuf::uint32 state(int index) const;
-  void set_state(int index, ::google::protobuf::uint32 value);
-  void add_state(::google::protobuf::uint32 value);
-  const ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >&
-      state() const;
-  ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >*
-      mutable_state();
+  // optional bool is_from_keyboard = 15;
+  void clear_is_from_keyboard();
+  static const int kIsFromKeyboardFieldNumber = 15;
+  bool is_from_keyboard() const;
+  void set_is_from_keyboard(bool value);
 
-  // repeated double ct = 20;
-  int ct_size() const;
-  void clear_ct();
-  static const int kCtFieldNumber = 20;
-  double ct(int index) const;
-  void set_ct(int index, double value);
-  void add_ct(double value);
+  // repeated double vl_x = 21;
+  int vl_x_size() const;
+  void clear_vl_x();
+  static const int kVlXFieldNumber = 21;
+  double vl_x(int index) const;
+  void set_vl_x(int index, double value);
+  void add_vl_x(double value);
   const ::google::protobuf::RepeatedField< double >&
-      ct() const;
+      vl_x() const;
   ::google::protobuf::RepeatedField< double >*
-      mutable_ct();
+      mutable_vl_x();
+
+  // repeated double vl_y = 22;
+  int vl_y_size() const;
+  void clear_vl_y();
+  static const int kVlYFieldNumber = 22;
+  double vl_y(int index) const;
+  void set_vl_y(int index, double value);
+  void add_vl_y(double value);
+  const ::google::protobuf::RepeatedField< double >&
+      vl_y() const;
+  ::google::protobuf::RepeatedField< double >*
+      mutable_vl_y();
+
+  // repeated double vl_z = 23;
+  int vl_z_size() const;
+  void clear_vl_z();
+  static const int kVlZFieldNumber = 23;
+  double vl_z(int index) const;
+  void set_vl_z(int index, double value);
+  void add_vl_z(double value);
+  const ::google::protobuf::RepeatedField< double >&
+      vl_z() const;
+  ::google::protobuf::RepeatedField< double >*
+      mutable_vl_z();
 
   // @@protoc_insertion_point(class_scope:delayMessage.DelayMsg)
  private:
@@ -250,11 +268,14 @@ class DelayMsg : public ::google::protobuf::Message /* @@protoc_insertion_point(
   double y_;
   double z_;
   double w_;
-  ::google::protobuf::RepeatedField< ::google::protobuf::uint32 > state_;
-  mutable int _state_cached_byte_size_;
-  ::google::protobuf::RepeatedField< double > ct_;
-  mutable int _ct_cached_byte_size_;
   ::google::protobuf::uint32 gps_;
+  bool is_from_keyboard_;
+  ::google::protobuf::RepeatedField< double > vl_x_;
+  mutable int _vl_x_cached_byte_size_;
+  ::google::protobuf::RepeatedField< double > vl_y_;
+  mutable int _vl_y_cached_byte_size_;
+  ::google::protobuf::RepeatedField< double > vl_z_;
+  mutable int _vl_z_cached_byte_size_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_delay_2eproto();
   friend void protobuf_AssignDesc_delay_2eproto();
@@ -555,64 +576,108 @@ inline void DelayMsg::set_gps(::google::protobuf::uint32 value) {
   // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.gps)
 }
 
-// repeated uint32 state = 19;
-inline int DelayMsg::state_size() const {
-  return state_.size();
+// optional bool is_from_keyboard = 15;
+inline void DelayMsg::clear_is_from_keyboard() {
+  is_from_keyboard_ = false;
 }
-inline void DelayMsg::clear_state() {
-  state_.Clear();
+inline bool DelayMsg::is_from_keyboard() const {
+  // @@protoc_insertion_point(field_get:delayMessage.DelayMsg.is_from_keyboard)
+  return is_from_keyboard_;
 }
-inline ::google::protobuf::uint32 DelayMsg::state(int index) const {
-  // @@protoc_insertion_point(field_get:delayMessage.DelayMsg.state)
-  return state_.Get(index);
-}
-inline void DelayMsg::set_state(int index, ::google::protobuf::uint32 value) {
-  state_.Set(index, value);
-  // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.state)
-}
-inline void DelayMsg::add_state(::google::protobuf::uint32 value) {
-  state_.Add(value);
-  // @@protoc_insertion_point(field_add:delayMessage.DelayMsg.state)
-}
-inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >&
-DelayMsg::state() const {
-  // @@protoc_insertion_point(field_list:delayMessage.DelayMsg.state)
-  return state_;
-}
-inline ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >*
-DelayMsg::mutable_state() {
-  // @@protoc_insertion_point(field_mutable_list:delayMessage.DelayMsg.state)
-  return &state_;
+inline void DelayMsg::set_is_from_keyboard(bool value) {
+  
+  is_from_keyboard_ = value;
+  // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.is_from_keyboard)
 }
 
-// repeated double ct = 20;
-inline int DelayMsg::ct_size() const {
-  return ct_.size();
+// repeated double vl_x = 21;
+inline int DelayMsg::vl_x_size() const {
+  return vl_x_.size();
 }
-inline void DelayMsg::clear_ct() {
-  ct_.Clear();
+inline void DelayMsg::clear_vl_x() {
+  vl_x_.Clear();
 }
-inline double DelayMsg::ct(int index) const {
-  // @@protoc_insertion_point(field_get:delayMessage.DelayMsg.ct)
-  return ct_.Get(index);
+inline double DelayMsg::vl_x(int index) const {
+  // @@protoc_insertion_point(field_get:delayMessage.DelayMsg.vl_x)
+  return vl_x_.Get(index);
 }
-inline void DelayMsg::set_ct(int index, double value) {
-  ct_.Set(index, value);
-  // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.ct)
+inline void DelayMsg::set_vl_x(int index, double value) {
+  vl_x_.Set(index, value);
+  // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.vl_x)
 }
-inline void DelayMsg::add_ct(double value) {
-  ct_.Add(value);
-  // @@protoc_insertion_point(field_add:delayMessage.DelayMsg.ct)
+inline void DelayMsg::add_vl_x(double value) {
+  vl_x_.Add(value);
+  // @@protoc_insertion_point(field_add:delayMessage.DelayMsg.vl_x)
 }
 inline const ::google::protobuf::RepeatedField< double >&
-DelayMsg::ct() const {
-  // @@protoc_insertion_point(field_list:delayMessage.DelayMsg.ct)
-  return ct_;
+DelayMsg::vl_x() const {
+  // @@protoc_insertion_point(field_list:delayMessage.DelayMsg.vl_x)
+  return vl_x_;
 }
 inline ::google::protobuf::RepeatedField< double >*
-DelayMsg::mutable_ct() {
-  // @@protoc_insertion_point(field_mutable_list:delayMessage.DelayMsg.ct)
-  return &ct_;
+DelayMsg::mutable_vl_x() {
+  // @@protoc_insertion_point(field_mutable_list:delayMessage.DelayMsg.vl_x)
+  return &vl_x_;
+}
+
+// repeated double vl_y = 22;
+inline int DelayMsg::vl_y_size() const {
+  return vl_y_.size();
+}
+inline void DelayMsg::clear_vl_y() {
+  vl_y_.Clear();
+}
+inline double DelayMsg::vl_y(int index) const {
+  // @@protoc_insertion_point(field_get:delayMessage.DelayMsg.vl_y)
+  return vl_y_.Get(index);
+}
+inline void DelayMsg::set_vl_y(int index, double value) {
+  vl_y_.Set(index, value);
+  // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.vl_y)
+}
+inline void DelayMsg::add_vl_y(double value) {
+  vl_y_.Add(value);
+  // @@protoc_insertion_point(field_add:delayMessage.DelayMsg.vl_y)
+}
+inline const ::google::protobuf::RepeatedField< double >&
+DelayMsg::vl_y() const {
+  // @@protoc_insertion_point(field_list:delayMessage.DelayMsg.vl_y)
+  return vl_y_;
+}
+inline ::google::protobuf::RepeatedField< double >*
+DelayMsg::mutable_vl_y() {
+  // @@protoc_insertion_point(field_mutable_list:delayMessage.DelayMsg.vl_y)
+  return &vl_y_;
+}
+
+// repeated double vl_z = 23;
+inline int DelayMsg::vl_z_size() const {
+  return vl_z_.size();
+}
+inline void DelayMsg::clear_vl_z() {
+  vl_z_.Clear();
+}
+inline double DelayMsg::vl_z(int index) const {
+  // @@protoc_insertion_point(field_get:delayMessage.DelayMsg.vl_z)
+  return vl_z_.Get(index);
+}
+inline void DelayMsg::set_vl_z(int index, double value) {
+  vl_z_.Set(index, value);
+  // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.vl_z)
+}
+inline void DelayMsg::add_vl_z(double value) {
+  vl_z_.Add(value);
+  // @@protoc_insertion_point(field_add:delayMessage.DelayMsg.vl_z)
+}
+inline const ::google::protobuf::RepeatedField< double >&
+DelayMsg::vl_z() const {
+  // @@protoc_insertion_point(field_list:delayMessage.DelayMsg.vl_z)
+  return vl_z_;
+}
+inline ::google::protobuf::RepeatedField< double >*
+DelayMsg::mutable_vl_z() {
+  // @@protoc_insertion_point(field_mutable_list:delayMessage.DelayMsg.vl_z)
+  return &vl_z_;
 }
 
 #endif  // !PROTOBUF_INLINE_NOT_IN_HEADERS

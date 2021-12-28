@@ -16,6 +16,7 @@
         <param name="uav_name" type="string" value="$(arg name)"/>
         <param name="axis_id" type="int" value="$(arg axis)"/>
         <param name="num_uav" type="int" value="$(arg num)"/>
+        <remap from="vel_cmd" to="vel_list"/>
     </node>
 
     <node

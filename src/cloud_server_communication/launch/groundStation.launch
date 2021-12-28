@@ -5,18 +5,6 @@
     <arg name="index" default="0"/>
     <arg name="name" default="groundStation"/>
     <arg name="num" default="10"/>
-    
-    <node
-        pkg = "cloud_server_communication"
-        type = "subscribe"
-        name = "$(arg name)_subscribe_node"
-        output = "screen"
-        respawn = "true">
-        <param name="uav_index" type="int" value="$(arg index)"/>
-        <param name="uav_name" type="string" value="$(arg name)"/>
-        <param name="axis_id" type="int" value="$(arg axis)"/>
-        <param name="num_uav" type="int" value="$(arg num)"/>
-    </node>
 
     <node
         pkg = "cloud_server_communication"
@@ -27,6 +15,7 @@
         <param name="uav_index" type="int" value="$(arg index)"/>
         <param name="uav_name" type="string" value="$(arg name)"/>
         <param name="axis_id" type="int" value="$(arg axis)"/>
+        <remap from="vel_list" to="velocity_list"/>
     </node>
 
      <node
