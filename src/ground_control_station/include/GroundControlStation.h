@@ -54,13 +54,16 @@ public:
         uavStatusUpdate = tmp;
 
         //uav marker 初始化
-        _uav_marker_array.resize(_uavNumbers);
+        UavMarker marker(_nh);
+        _uav_marker_array.resize(_uavNumbers, marker);
 
         // 设置原点
         gps2enu.Reset(latitude, longitude, altitude);
+
         // ros
         _pos_pub = _nh.advertise<ground_control_station::Array3>("/position_list", 10);
         _status_sub = _nh.subscribe("/UAVs/status", 10, &GroundControlStation::status_sub_cb, this);
+
         // 位置
         _pos_x = _pos_y = _pos_z = 0;
         _pos_arr.x.resize(_uavNumbers); _pos_arr.y.resize(_uavNumbers); _pos_arr.z.resize(_uavNumbers);

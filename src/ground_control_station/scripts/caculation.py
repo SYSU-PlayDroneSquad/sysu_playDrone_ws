@@ -113,7 +113,7 @@ latitude = 0.0000000
 longitude = 0.0000000
 altitude = 0.0000000
 seq = 0
-step = 6012
+step = 500
 
 def gps_sub_cb(gps):
     global latitude, longitude, altitude, seq, step
