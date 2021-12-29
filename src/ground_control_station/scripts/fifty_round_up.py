@@ -11,8 +11,6 @@ from environment import Env
 from ground_control_station.msg import Array3
 import numpy as np
 
-hunt_end = False
-
 
 # 输出控制速度到屏幕
 def output_screen(vel_xy):
@@ -23,17 +21,15 @@ def output_screen(vel_xy):
     print("")
 
 
-# 追捕状态
-def hunt_status(status):
-    global hunt_end
-    hunt_end = status
+hunt_end = False
 
 
 # 追捕
 def hunt(p_locs, e_loc):
-    env1 = Env(256, 256)    # 实例化 Env 类
+    env1 = Env(256, 256)  # 实例化 Env 类
     env1.input(p_locs, e_loc)
-    vel_xy = env1.run()
+    global hunt_end
+    vel_xy, hunt_end = env1.run()
     # output_screen(vel_xy)
     return vel_xy
 
@@ -47,12 +43,11 @@ def treibjagd(pos_arr):
 
 
 # 位置订阅回调
-def pos_sub_CB1(pos, vel_pub):
-
+def pos_sub_cb(pos, vel_pub, uavNumbers):
     p_locs = []  # -------------------------- 无人机位置
-    pos_arr = np.zeros((3, 8), dtype='f8')  # 无人机位置
+    pos_arr = np.zeros((3, uavNumbers), dtype='f8')  # 无人机位置
 
-    for i in range(1):
+    for i in range(uavNumbers):
         pos_arr[0, i] = pos.x[i]
         pos_arr[1, i] = pos.y[i]
         pos_arr[2, i] = pos.z[i]
@@ -60,31 +55,33 @@ def pos_sub_CB1(pos, vel_pub):
         p_locs.append(loc)
 
     # ============================ 追捕或围猎 ============================
-    vel_xy = np.zeros((3, 8), dtype='f8')   # 速度控制
-    v_xy = np.zeros((2, 8), dtype='f8')
-    e_loc = [0, 24]  # 目标点位置
+    vel_xy = np.zeros((3, uavNumbers), dtype='f8')  # 速度控制
+    v_xy = np.zeros((2, uavNumbers), dtype='f8')
+    e_loc = [35.11905, 54.52596]  # 目标点位置
     if not hunt_end:
         v_xy = hunt(p_locs, e_loc)
     else:
         vel_xy = treibjagd(pos_arr)
 
     # =============================  发布  =============================
-    # print(v_xy[0][0][0])
     vel_arr = Array3()
-    for i in range(8):
-        if hunt_end:
-            vel_arr.x[i].insert(vel_xy[0, i])
-            vel_arr.y[i].insert(vel_xy[1, i])
-            vel_arr.z[i].insert(vel_xy[2, i])
-        else:
-            vel_arr.x.append(v_xy[0][0][i])
-            vel_arr.y.append(v_xy[0][1][i])
+    vel_arr.y.insert()
+    for i in range(uavNumbers):
+        if not hunt_end:
+            vel_arr.x[i] = v_xy[0, i]
+            vel_arr.y[i] = v_xy[1, i]
             vel_arr.z.append(0)
+        else:
+            vel_arr[0, i] = vel_xy[0, i]
+            vel_arr[1, i] = vel_xy[1, i]
+            vel_arr[2, i] = vel_xy[2, i]
+
     vel_pub.publish(vel_arr)
 
 
 if __name__ == '__main__':
     rospy.init_node('fifty_round_up', anonymous=True)
+    uavNumbers = 8
     vel_pub = rospy.Publisher('/velocity_list', Array3, queue_size=1)
-    pos_sub = rospy.Subscriber('/position_list', Array3, pos_sub_CB1, vel_pub)
+    pos_sub = rospy.Subscriber('/position_list', Array3, pos_sub_cb, vel_pub, uavNumbers)
     rospy.spin()

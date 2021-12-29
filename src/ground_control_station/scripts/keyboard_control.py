@@ -33,7 +33,7 @@ msg = """
  |        1 : Takeoff                    | 
  |        2 : Land                       | 
  |        3 : Switch single mode         |
- |        4 : Set local frame            |
+ |        4 : round up                   |
  |        Tab: Switch frame              |     
  |                                       | 
  =========================================

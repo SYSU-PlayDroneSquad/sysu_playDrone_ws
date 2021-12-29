@@ -12,7 +12,7 @@
 #include "GroundControlStation.h"
 
 int main(int argc, char **argv) {
-    ros::init(argc, argv, "uav_marker");
+    ros::init(argc, argv, "ground_control_station");
     ros::NodeHandle nh;
 
     // 从参数服务器获取参数

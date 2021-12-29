@@ -38,10 +38,7 @@ public:
         _frame = true; // true = ENU ; false = FLU
         // 速度消息
         _xCmd = _yCmd = _zCmd = _yawCmd = 0;
-        _setVelYaw_msg.axes.emplace_back(_xCmd);
-        _setVelYaw_msg.axes.emplace_back(_yCmd);
-        _setVelYaw_msg.axes.emplace_back(_zCmd);
-        _setVelYaw_msg.axes.emplace_back(_yawCmd);
+        _setVelYaw_msg.axes.resize(4);
 
         // 姿态角
         _yaw = _roll = _pitch = 0.0;
@@ -57,9 +54,12 @@ public:
                 _uavName + "/dji_sdk/drone_arm_control");
 
         // 速度订阅与发布
-        _vel_list_sub = nh.subscribe("/velocity_list", 100, &DjiN3Controller::vel_list_sub_CB, this);
+
         _setVelYaw_pub = nh.advertise<sensor_msgs::Joy>(
                 _uavName + "/dji_sdk/flight_control_setpoint_ENUvelocity_yawrate", 10);
+        _vel_list_sub = nh.subscribe<ground_control_station::Array3>(
+                "/vel_list", 100,
+                boost::bind(&DjiN3Controller::vel_list_sub_CB, this, _1, _uavName, _setVelYaw_pub));
 
         // FLU 到 ENU 的旋转四元数订阅
         _dji_att_sub = _nh.subscribe<geometry_msgs::QuaternionStamped>(
@@ -270,6 +270,11 @@ public:
 
     void round_up(){
         _round_up = !_round_up;
+        if(_round_up){
+            cout << "start round up!" << endl;
+        } else{
+            cout << "end round up" << endl;
+        }
     }
 
     void go_home(){}
@@ -402,14 +407,15 @@ public:
         quat2Tf2Rpy(msg);
     }
 
-    void vel_list_sub_CB(const ground_control_station::Array3ConstPtr &vel_list) {
+    void vel_list_sub_CB(const ground_control_station::Array3::ConstPtr &vel_list, string uavName, ros::Publisher &pub) {
         if(_round_up){
+            cout << "round up" << endl;
             int id = _uavName[3] - '0' - 1;
-            _xCmd = vel_list->x[id];
-            _yCmd = vel_list->y[id];
-            _zCmd = vel_list->z[id];
+            _xCmd = vel_list->x[0];
+            _yCmd = vel_list->y[0];
+            _zCmd = vel_list->z[0];
             get_vel();
-            _setVelYaw_pub.publish(_setVelYaw_msg);
+            pub.publish(_setVelYaw_msg);
         }
     }
 
@@ -515,7 +521,7 @@ private:
     // 解锁电机
     ros::ServiceClient _motor_control_client;
     // 速度
-    sensor_msgs::Joy _setVelYaw_msg;
+    static sensor_msgs::Joy _setVelYaw_msg;
     ros::Publisher _setVelYaw_pub;
     ros::Subscriber _vel_list_sub;
 
@@ -527,7 +533,7 @@ private:
     static double _roll, _pitch, _yaw, _yawRate, _rate;
 
     // 围捕
-    bool _round_up;
+    static bool _round_up;
 
     /*
     // 位置
@@ -552,6 +558,8 @@ private:
 };
 // string DjiN3Controller::_local_frame = string("0");
 // uint8_t DjiN3Controller::_gps_health = 0;
+sensor_msgs::Joy DjiN3Controller::_setVelYaw_msg;
+bool DjiN3Controller::_round_up = false;
 double DjiN3Controller::_roll = 0.0;
 double DjiN3Controller::_pitch = 0.0;
 double DjiN3Controller::_yaw = 0.0;
