@@ -65,11 +65,12 @@ def pos_sub_cb(pos, vel_pub, uavNumbers):
 
     # =============================  发布  =============================
     vel_arr = Array3()
+    vel_arr.y.insert()
     for i in range(uavNumbers):
         if not hunt_end:
-            vel_arr[0, i] = v_xy[0, i]
-            vel_arr[1, i] = v_xy[1, i]
-            vel_arr[2, i] = 0
+            vel_arr.x[i] = v_xy[0, i]
+            vel_arr.y[i] = v_xy[1, i]
+            vel_arr.z.append(0)
         else:
             vel_arr[0, i] = vel_xy[0, i]
             vel_arr[1, i] = vel_xy[1, i]
