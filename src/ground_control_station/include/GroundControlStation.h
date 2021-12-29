@@ -52,7 +52,7 @@ public:
         gps2enu.Reset(latitude, longitude, altitude);
         // ros
         _pos_pub = _nh.advertise<ground_control_station::Array3>("/position_list", 10);
-        _status_sub = _nh.subscribe("/abc", 1, &GroundControlStation::status_sub_cb, this);
+        _status_sub = _nh.subscribe("/UAVs/status", 1, &GroundControlStation::status_sub_cb, this);
 
         _pos_x = _pos_y = _pos_z = 0;
         _pos_arr.x.resize(_uavNumbers); _pos_arr.y.resize(_uavNumbers); _pos_arr.z.resize(_uavNumbers);
