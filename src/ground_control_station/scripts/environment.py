@@ -109,7 +109,7 @@ class Env(object):
         self.agents.get_all_gap()
         self.agents.get_v(self.evaders.evaders[0].loc, self.evaders.evaders[0].v)
 
-        status = self.agents.whether_complete()
+        status, gap_error = self.agents.whether_complete()
         v = np.zeros((2, 8), dtype='f8')
 
 
@@ -121,18 +121,18 @@ class Env(object):
             v[0][int(a.id)] = a.v[0]
             v[1][int(a.id)] = a.v[1]
 
+        l = self.agents.in_range_list()
 
 
+        return v, status, l, gap_error
 
-        return v, status
 
-
-    def input(self, locs, e_loc):
+    def input(self, locs, e_loc, l):
 
         i = 0
         for p in locs:
-            l = np.array([p[0], p[1]])
-            a = Agent(i, l, 1, 5)
+            loc = np.array([p[0], p[1]])
+            a = Agent(i, loc, 1, 8, l[i])
             self.agents.agents.append(a)
             i = i + 1
 

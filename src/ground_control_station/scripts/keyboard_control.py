@@ -33,7 +33,8 @@ msg = """
  |        1 : Takeoff                    | 
  |        2 : Land                       | 
  |        3 : Switch single mode         |
- |        4 : round up                   |
+ |        4 : Round up                   |
+ |        5 : Correcte height            |
  |        Tab: Switch frame              |     
  |                                       | 
  =========================================
@@ -98,6 +99,8 @@ def tasks_publish(pub, key):
         uavName = switch_single_mode(single_mode)
     elif key == '4':
         cmd = 'RoundUp'
+    elif key == '5':
+        cmd = 'CorrecteHeight'
     elif key == 'w':
         cmd = 'Forward'
     elif key == 's':

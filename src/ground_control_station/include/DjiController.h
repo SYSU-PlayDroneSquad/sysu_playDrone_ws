@@ -59,7 +59,7 @@ public:
                 _uavName + "/dji_sdk/flight_control_setpoint_ENUvelocity_yawrate", 10);
         _vel_list_sub = nh.subscribe<ground_control_station::Array3>(
                 "/vel_list", 100,
-                boost::bind(&DjiN3Controller::vel_list_sub_CB, this, _1, _uavName, _setVelYaw_pub));
+                boost::bind(&DjiN3Controller::vel_list_sub_CB, this, _1, _setVelYaw_pub));
 
         // FLU 到 ENU 的旋转四元数订阅
         _dji_att_sub = _nh.subscribe<geometry_msgs::QuaternionStamped>(
@@ -407,13 +407,13 @@ public:
         quat2Tf2Rpy(msg);
     }
 
-    void vel_list_sub_CB(const ground_control_station::Array3::ConstPtr &vel_list, string uavName, ros::Publisher &pub) {
+    void vel_list_sub_CB(const ground_control_station::Array3::ConstPtr &vel_list, ros::Publisher &pub) {
         if(_round_up){
             cout << "round up" << endl;
             int id = _uavName[3] - '0' - 1;
-            _xCmd = vel_list->x[0];
-            _yCmd = vel_list->y[0];
-            _zCmd = vel_list->z[0];
+            _xCmd = vel_list->x[id];
+            _yCmd = vel_list->y[id];
+            _zCmd = vel_list->z[id];
             get_vel();
             pub.publish(_setVelYaw_msg);
         }

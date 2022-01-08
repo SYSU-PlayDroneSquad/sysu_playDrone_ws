@@ -8,15 +8,15 @@ import random
 
 class Agent(object):
 
-    def __init__(self, id, loc, group, a_range):
+    def __init__(self, id, loc, group, a_range, state):
 
         self.id = id
         self.loc = loc
         self.group = group
-        self.vmax = 0.8  # pursuer 速度
+        self.vmax = 1.2  # pursuer 速度
         self.a_range = a_range
         self._in_range = 0
-        self.state = 0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+        self.state = state
         self.time_step = 1
         self._relative_angle = 0
         self.gap = 0
@@ -44,12 +44,16 @@ class Agent(object):
         return theta
 
     def whether_in_range(self, e_loc):
-        self.dis = np.linalg.norm(np.array(self.loc - e_loc))
-        if self.a_range - 0.8 <= self.dis <= self.a_range + 0.8:
-            self._in_range = 1
+        if self.state == 1:
             self.state = 1
+	    self.dis = np.linalg.norm(np.array(self.loc - e_loc))
         else:
-            self._in_range = 0
+            self.dis = np.linalg.norm(np.array(self.loc - e_loc))
+            if self.a_range - 0.8 <= self.dis <= self.a_range + 0.8:
+                self._in_range = 1
+                self.state = 1
+            else:
+                self._in_range = 0
 
     def get_relative_angle(self, e_loc):
         self._relative_angle = self.angle(e_loc, self.loc)
@@ -65,7 +69,7 @@ class Agent(object):
         if self.state == 0:
             self.v = [0, self.vmax]
         if self.state == 1:
-            change = self.vmax / self.a_range
+            change = self.vmax / self.dis
             if change > np.abs(self.gap):
                 angle1 = self._relative_angle - self.gap / 2
                 new_loc = e_loc + self.dis * np.array([np.cos(angle1), np.sin(angle1)])
@@ -207,7 +211,7 @@ class Agents(object):
         for a in self.agents:
             a.whether_in_range(e_loc)
         for a in self.agents:
-            if a._in_range == 1:
+            if a.state == 1:
                 if a.group == 1:
                     inlist1.append(np.array([a.id, a._relative_angle]))
                 if a.group == 2:
@@ -232,10 +236,10 @@ class Agents(object):
             gaps.append(a.gap)
 
         gap_error = np.linalg.norm(gaps)
-        if 0.08 <= gap_error <= 0.13 and len(self.inrange1) == 8:
-            return True
+        if 0.6 <= gap_error <= 0.7 and len(self.inrange1) == 4:
+            return True, gap_error
         else:
-            return False
+            return False, gap_error
 
     def _in_range_count(self):
         count = 0
@@ -269,7 +273,7 @@ class Agents(object):
                 self.agents[int(inrange[j][0])].gap = gap
 
         if length == 1:
-            self.agents[int(inrange[0][0])].gap = 2 * np.pi
+            self.agents[int(inrange[0][0])].gap = np.pi
 
     def get_all_gap(self):
         if len(self.inrange1) != 0:
@@ -295,3 +299,8 @@ class Agents(object):
         for a in self.agents:
             a.repel()
 
+    def in_range_list(self):
+        l = []
+        for a in self.agents:
+            l.append(a.state)
+        return l

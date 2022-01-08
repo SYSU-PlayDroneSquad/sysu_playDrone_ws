@@ -32,6 +32,8 @@ delayMessage::DelayMsg delaymsg;
 ground_control_station::Status status;
 ros::Time stamp;
 
+static int a = 0;
+
 void assignStatus() {
     stamp.sec = delaymsg.send_time();
     // Assign header
@@ -71,7 +73,10 @@ int main(int argc, char **argv)
 
     // publish msg to ground control station
     ros::Publisher statusPub = nh.advertise<ground_control_station::StatusArray>("status", 10);
+    ros::Publisher abc_pub = nh.advertise<std_msgs::String>("abc", 10);
 
+   int hwm = 1;
+    // 绑定地址
     for(int i=0;i<numUav;++i){
         if(0==zmq_connect(subscriberList[i], sub_ground_addr_list[i])){
             ROS_INFO("client %d bind success", i);//return 0 if success
@@ -81,53 +86,67 @@ int main(int argc, char **argv)
             return -1;
         }
         zmq_setsockopt(subscriberList[i], ZMQ_SUBSCRIBE, "", 0);
+	      zmq_setsockopt(subscriberList[i], ZMQ_SNDHWM, &hwm, sizeof(hwm));
+	      zmq_setsockopt(subscriberList[i], ZMQ_RCVHWM, &hwm, sizeof(hwm));
     }
     
-    ros::Rate loop_rate(100);
+    ros::Rate loop_rate(50);
+    // zmq_msg_t recv_msg;
+    // zmq_msg_init(&recv_msg);
 
     while(ros::ok()){
-        delaymsg.Clear();
-        zmq_msg_t recv_msg;
-        zmq_msg_init(&recv_msg);
-
-        for (int i = 0; i < numUav; i++)
-        {
-            int recv_byte = zmq_msg_recv(&recv_msg,subscriberList[i],0);//ZMQ_DONTWAIT
-
-            if(recv_byte > 0)
+        ros::Time start_time = ros::Time::now();
+        std_msgs::String abc;
+         while (ros::Time::now() - start_time < ros::Duration(0.006)){
+            delaymsg.Clear();
+            zmq_msg_t recv_msg;
+            zmq_msg_init(&recv_msg);
+            for (int i = 0; i < numUav; i++)
             {
-                ROS_INFO("Ground control station receive message (%d bytes) success.", recv_byte);
+  //            delaymsg.Clear();
+  //	          zmq_msg_t recv_msg;
+  //            zmq_msg_init(&recv_msg);
+                int recv_byte = zmq_msg_recv(&recv_msg,subscriberList[i],0);//ZMQ_DONTWAIT
 
-                string str;
-                // std_msgs::String status;
-                str.assign((char*)zmq_msg_data(&recv_msg),recv_byte);
-                zmq_msg_close(&recv_msg);
-                //    int index = str.find_first_of('\0');
-                //    ROS_INFO("%d",index);
-                //    delaymsg.ParseFromString(str.substr(0,index));
-                delaymsg.ParseFromString(str);
-                assignStatus();
+                if(recv_byte > 0)
+                {
+                  ROS_INFO("Ground control station receive message (%d bytes) success.", recv_byte);
 
-                ROS_INFO("The status of uav%d : %d", delaymsg.uav_id(), status.lv_gps);
-                ROS_INFO("The sequence: %d, the stamp: %f, the frame_id: %s", status.seq, delaymsg.send_time(), delaymsg.str().c_str());
-                ROS_INFO("The latitude: %f, the longitude: %f, the altitude: %f", status.latitude, status.longitude, status.altitude);
-                ROS_INFO("The x: %f, the y: %f, the z: %f, the w: %f", status.quaternion.x, status.quaternion.y, status.quaternion.z, status.quaternion.w);
+                  string str;
+                  // std_msgs::String status;h
+                  str.assign((char*)zmq_msg_data(&recv_msg),recv_byte);
+                  zmq_msg_close(&recv_msg);
+                  //    int index = str.find_first_of('\0');
+                  //    ROS_INFO("%d",index);
+                  //    delaymsg.ParseFromString(str.substr(0,index));
+                  delaymsg.ParseFromString(str);
+                  assignStatus();
+//
+                  ROS_INFO("The status of uav%d : %d", delaymsg.uav_id(), status.lv_gps);
+                  ROS_INFO("The sequence: %d, the stamp: %f, the frame_id: %s", status.seq, delaymsg.send_time(), delaymsg.str().c_str());
+                  ROS_INFO("The latitude: %f, the longitude: %f, the altitude: %f", status.latitude, status.longitude, status.altitude);
+                  ROS_INFO("The x: %f, the y: %f, the z: %f, the w: %f", status.quaternion.x, status.quaternion.y, status.quaternion.z, status.quaternion.w);
 
-                statusarr[status.id - 1] = status;
+                  statusarr[status.id - 1] = status;
+                  ++a;
+                  abc.data = std::to_string(a);
+                }
             }
-        }  
-
+        }
         statusArray.StatusArray = statusarr;
-        statusPub.publish(statusArray); 
+        statusPub.publish(statusArray);
 
-        ros::spinOnce();
-        loop_rate.sleep();
+        abc_pub.publish(abc);
+        // std::cout << ros::Time::now() - start_time << std::endl;
+        // start_time = ros::Time::now();
+        // ros::spinOnce();
+        // loop_rate.sleep();
     }
 
 
     zmq_close(subscriber);
     zmq_ctx_destroy(ctx);
 
-    ros::shutdown();
+    // ros::shutdown();
     return 0;
 }

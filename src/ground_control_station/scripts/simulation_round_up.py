@@ -35,9 +35,8 @@ def hunt(p_locs, e_loc):
 
 # 围猎
 st8 = ST8()
-def treibjagd(pos_arr):
-    global st8
-    vel_xy = st8.op_vol(pos_arr)
+def treibjagd(pos_arr, txy):
+    vel_xy = st8.op_vol(pos_arr, txy)
     # output_screen(vel_xy)
     return vel_xy
 
@@ -60,7 +59,7 @@ def pos_sub_CB1(pos, pub_list):
     if not hunt_end:
         v_xy = hunt(p_locs, e_loc)
     else:
-        vel_xy = treibjagd(pos_arr)
+        vel_xy = treibjagd(pos_arr, e_loc)
 
     # =============================  发布  =============================
     twist_msg = Twist()
