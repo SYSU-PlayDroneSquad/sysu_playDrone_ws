@@ -32,8 +32,6 @@ delayMessage::DelayMsg delaymsg;
 ground_control_station::Status status;
 ros::Time stamp;
 
-static int a = 0;
-
 void assignStatus() {
     stamp.sec = delaymsg.send_time();
     // Assign header
@@ -73,7 +71,6 @@ int main(int argc, char **argv)
 
     // publish msg to ground control station
     ros::Publisher statusPub = nh.advertise<ground_control_station::StatusArray>("status", 10);
-    ros::Publisher abc_pub = nh.advertise<std_msgs::String>("abc", 10);
 
    int hwm = 1;
     // 绑定地址
@@ -86,10 +83,10 @@ int main(int argc, char **argv)
             return -1;
         }
         zmq_setsockopt(subscriberList[i], ZMQ_SUBSCRIBE, "", 0);
-	      zmq_setsockopt(subscriberList[i], ZMQ_SNDHWM, &hwm, sizeof(hwm));
-	      zmq_setsockopt(subscriberList[i], ZMQ_RCVHWM, &hwm, sizeof(hwm));
+        zmq_setsockopt(subscriberList[i], ZMQ_SNDHWM, &hwm, sizeof(hwm));
+        zmq_setsockopt(subscriberList[i], ZMQ_RCVHWM, &hwm, sizeof(hwm));
     }
-    
+
     ros::Rate loop_rate(50);
     // zmq_msg_t recv_msg;
     // zmq_msg_init(&recv_msg);
@@ -128,15 +125,13 @@ int main(int argc, char **argv)
                   ROS_INFO("The x: %f, the y: %f, the z: %f, the w: %f", status.quaternion.x, status.quaternion.y, status.quaternion.z, status.quaternion.w);
 
                   statusarr[status.id - 1] = status;
-                  ++a;
-                  abc.data = std::to_string(a);
+
                 }
             }
         }
         statusArray.StatusArray = statusarr;
         statusPub.publish(statusArray);
 
-        abc_pub.publish(abc);
         // std::cout << ros::Time::now() - start_time << std::endl;
         // start_time = ros::Time::now();
         // ros::spinOnce();

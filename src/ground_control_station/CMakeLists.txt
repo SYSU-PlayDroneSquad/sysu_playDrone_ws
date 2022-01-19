@@ -18,7 +18,7 @@ find_package(GeographicLib REQUIRED) #地理库
 add_compile_options(-std=c++11)
 
 # 自定义消息
-add_message_files(FILES Array3.msg Status.msg StatusArray.msg)
+add_message_files(FILES Array3.msg Status.msg StatusArray.msg StatusNew.msg StatusArrayNew.msg)
 add_service_files(FILES EnableMotors.srv)
 generate_messages(DEPENDENCIES std_msgs geometry_msgs ground_control_station)
 
@@ -58,11 +58,14 @@ add_library(
         src/command_parser.cpp
 )
 
-add_library(
-        uav_status_update_lib
-        include/UavStatusUpdate.h
-        src/uav_status_update.cpp
-)
+#add_library(
+#        uav_status_update_lib
+#        include/UavStatusUpdate.h
+#        src/uav_status_update.cpp
+#)
+
+#add_executable(uav_status_update src/uav_status_update.cpp)
+#target_link_libraries(uav_status_update uav_status_update_lib ${catkin_LIBRARIES})
 
 add_library(
         ground_control_station_lib
@@ -76,9 +79,6 @@ target_link_libraries(simulation_control_station simulation_control_station_lib 
 
 add_executable(command_parser src/command_parser.cpp)
 target_link_libraries(command_parser command_parser_lib ${catkin_LIBRARIES} ${DJIOSDK_LIBRARIES})
-
-add_executable(uav_status_update src/uav_status_update.cpp)
-target_link_libraries(uav_status_update uav_status_update_lib ${catkin_LIBRARIES})
 
 add_executable(simulation_position_fusion src/simulation_position_fusion.cpp)
 target_link_libraries(simulation_position_fusion  ${catkin_LIBRARIES})

@@ -7,14 +7,9 @@
 
 // c++ include
 #include <map>
+#include <sstream>
 
-using std::cout;
-using std::endl;
-using std::string;
-using std::vector;
-using std::left;
-using std::right;
-using std::setw;
+using namespace std;
 
 class UavStatusUpdate{
 public:
@@ -24,18 +19,26 @@ public:
         _nh = nh;
         _uavNumbers = uavNumbers;
         _full = false;
+        string space = " "; space.resize(8, ' ');
+        _lv_5 = "\33[31m▮\33[35m▮\33[33m▮\33[32m▮▮\33[0m" + space;
+        _lv_4 = "\33[31m▮\33[35m▮\33[33m▮\33[32m▮\33[0m " + space;
+        _lv_3 = "\33[31m▮\33[35m▮\33[33m▮\33[0m  " + space;
+        _lv_2 = "\33[31m▮\33[35m▮\33[0m   " + space;
+        _lv_1 = "\33[31m▮\33[0m    " + space;
+        _lv_0 = "\33[31m✖\33[0m    " + space;
+
     }
 
     ~UavStatusUpdate()= default;
 
-    void data_handing(const string& data){ // data: uav1#5
-        push_uavName(data);
-        push_item(data);
-        output();
+    void data_handing(unsigned int id, unsigned int lv_gps, unsigned flight_status, double &height){
+        push_uavName(id);
+        push_item(id, lv_gps, height);
+        // output();
     }
 
     // 把 uavName push 进 _status
-    void push_uavName(string data){
+    void push_uavName(unsigned int id){
         if(!_full){
             // 检查 _status[] 空缺的uavName个数
             int empty = 0;
@@ -44,8 +47,7 @@ public:
                     ++empty;
                 }
             }
-            string uavName = data.substr(0, data.find('v') + 1) + " "
-                    + data.substr(data.find('v') + 1, data.find('#') - data.find('v') - 1);
+            string uavName = "uav " + std::to_string(id);
             if(empty && !storage(uavName, empty)){
                 _status[_uavNumbers - empty][0] = uavName;
                 --empty;
@@ -94,24 +96,24 @@ public:
 
 
     // 把无人机的状态条目 push 到 _status
-    void push_item(string data) const{
-        string uavName = data.substr(0, data.find('v') + 1) + " "
-                         + data.substr(data.find('v') + 1, data.find('#') - data.find('v') - 1);
-        int lv_gps = data[data.find('#') + 1] - '0';
-
+    void push_item(unsigned int &id, unsigned int &lv_gps, double &height) const{
+        string uavName = "uav " + std::to_string(id);
         string icon_gps;
+        if(height < 0.1) height = 0;
+
         switch (lv_gps) {
-            case 5: icon_gps = "\33[31m▮\33[35m▮\33[33m▮\33[32m▮▮\33[0m"; break;
-            case 4: icon_gps = "\33[31m▮\33[35m▮\33[33m▮\33[32m▮\33[0m";  break;
-            case 3: icon_gps = "\33[31m▮\33[35m▮\33[33m▮\33[0m";    break;
-            case 2: icon_gps = "\33[31m▮\33[35m▮\33[0m";     break;
-            case 1: icon_gps = "\33[31m▮\33[0m";       break;
-            case 0: icon_gps = "\33[31m✖\33[0m"; break;
-            default: icon_gps = "???";    break;
+            case 5: icon_gps = _lv_5; break;
+            case 4: icon_gps = _lv_4; break;
+            case 3: icon_gps = _lv_3; break;
+            case 2: icon_gps = _lv_2; break;
+            case 1: icon_gps = _lv_1; break;
+            case 0: icon_gps = _lv_0; break;
+            default: icon_gps = "???";break;
         }
         for(int i = 0; i < _uavNumbers; i++){
             if(uavName == _status[i][0]){
                 _status[i][2] = icon_gps;
+                _status[i][3] = precision(height);
                 int count = atoi(_status[i][1].c_str());
                 count++;
                 _status[i][1] = std::to_string(count);
@@ -119,11 +121,20 @@ public:
         }
     }
 
+    // 数据精度
+    string precision(const double &value) const {
+        std::stringstream ss;
+        ss << setprecision(3) << value;
+        string result;
+        return ss.str();
+
+    }
+
     // 输出到屏幕
     void output() const{
         system("clear");
-        string header =  "编号          GPS           位置           ";
-        string line   =  "————————————————————————————————————————————";
+        string header =  "编号        GPS         高度(m)      电机         电量  ";
+        string line   =  "——————————————————————————————————————————————————————";
         string flash  =  "\33[37m☁\33[0m";
 
         switch (_flash++) {
@@ -134,7 +145,8 @@ public:
         int empty = 0;
         for(int i = 0; i < _uavNumbers; i++){
             if(!_status[i][0].empty()){
-                cout << left << setw(13) << _status[i][0] << _status[i][2] << endl;
+                 cout << left << setw(12) << _status[i][0] << _status[i][2] << _status[i][3] << endl;
+                // cout << _status[i][3] << endl;
             } else {
                 empty++;
             }
@@ -148,8 +160,9 @@ public:
     void check_status_CB(const ros::TimerEvent &event) const{
         for(int i = 0; i < _uavNumbers; i++){
             if(!_status[i][0].empty()){
-                if(_status[i][1] < "3"){
-                    _status[i][2] = "\33[31mLink down!\33[0m";
+                if(_status[i][1] < "1"){
+                    _status[i][2] = "\33[31m        Link  down!       \33[0m";
+                    _status[i][3] = " ";
                 }
                 _status[i][1] = "0";
                 output();
@@ -165,6 +178,10 @@ private:
     int _uavNumbers{};
     bool _full{};
     static int _flash;
+    string _lv_0; string _lv_1; string _lv_2;
+    string _lv_3; string _lv_4; string _lv_5;
+    ros::Timer _check_status =
+            _nh.createTimer(ros::Duration(0.1), &UavStatusUpdate::check_status_CB, this);
 };
 
 vector<vector<string>> UavStatusUpdate::_status(1);

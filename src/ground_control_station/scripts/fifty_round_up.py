@@ -67,7 +67,7 @@ def pos_sub_cb(pos, vel_pub):
     vel_xy = np.zeros((3, uavNumbers), dtype='f8')  # 速度控制
     v_xy = np.zeros((2, uavNumbers), dtype='f8')
     # e_loc = [35.11905, 54.52596]  # 目标点位置
-    e_loc = [2.5, 40.0]  # 目标点位置
+    e_loc = [0.5, 42.5]  # 目标点位置
     #e_loc = [43.5, -21.5]  # 目标点位置
     if not hunt_end:
         v_xy = hunt(p_locs, e_loc, in_list)
