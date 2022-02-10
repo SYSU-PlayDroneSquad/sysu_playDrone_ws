@@ -206,9 +206,15 @@ class DelayMsg : public ::google::protobuf::Message /* @@protoc_insertion_point(
   ::google::protobuf::uint32 gps() const;
   void set_gps(::google::protobuf::uint32 value);
 
-  // optional bool is_from_keyboard = 15;
+  // optional uint32 flight_status = 15;
+  void clear_flight_status();
+  static const int kFlightStatusFieldNumber = 15;
+  ::google::protobuf::uint32 flight_status() const;
+  void set_flight_status(::google::protobuf::uint32 value);
+
+  // optional bool is_from_keyboard = 16;
   void clear_is_from_keyboard();
-  static const int kIsFromKeyboardFieldNumber = 15;
+  static const int kIsFromKeyboardFieldNumber = 16;
   bool is_from_keyboard() const;
   void set_is_from_keyboard(bool value);
 
@@ -269,13 +275,14 @@ class DelayMsg : public ::google::protobuf::Message /* @@protoc_insertion_point(
   double z_;
   double w_;
   ::google::protobuf::uint32 gps_;
-  bool is_from_keyboard_;
+  ::google::protobuf::uint32 flight_status_;
   ::google::protobuf::RepeatedField< double > vl_x_;
   mutable int _vl_x_cached_byte_size_;
   ::google::protobuf::RepeatedField< double > vl_y_;
   mutable int _vl_y_cached_byte_size_;
   ::google::protobuf::RepeatedField< double > vl_z_;
   mutable int _vl_z_cached_byte_size_;
+  bool is_from_keyboard_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_delay_2eproto();
   friend void protobuf_AssignDesc_delay_2eproto();
@@ -576,7 +583,21 @@ inline void DelayMsg::set_gps(::google::protobuf::uint32 value) {
   // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.gps)
 }
 
-// optional bool is_from_keyboard = 15;
+// optional uint32 flight_status = 15;
+inline void DelayMsg::clear_flight_status() {
+  flight_status_ = 0u;
+}
+inline ::google::protobuf::uint32 DelayMsg::flight_status() const {
+  // @@protoc_insertion_point(field_get:delayMessage.DelayMsg.flight_status)
+  return flight_status_;
+}
+inline void DelayMsg::set_flight_status(::google::protobuf::uint32 value) {
+  
+  flight_status_ = value;
+  // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.flight_status)
+}
+
+// optional bool is_from_keyboard = 16;
 inline void DelayMsg::clear_is_from_keyboard() {
   is_from_keyboard_ = false;
 }

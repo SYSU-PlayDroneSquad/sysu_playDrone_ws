@@ -6,38 +6,42 @@ import rospy
 from geometry_msgs.msg import Twist
 
 # import other files
-from fifty_8test import ST8
+from fifty_8test_rt import ST8
 from environment import Env
 from ground_control_station.msg import Array3
 import numpy as np
 
-hunt_end = False
-
+hunt_end = True
+in_list = [0, 0, 0, 0, 0, 0, 0, 0]
+gap_error = 0
 
 # 输出控制速度到屏幕
 def output_screen(vel_xy):
-    for i in range(8):
-        print('x' + str(i) + ' = ' + str(vel_xy[0][i])
-              + '  y' + str(i) + ' = ' + str(vel_xy[1][i])
-              + '  z' + str(i) + ' = ' + str(vel_xy[2][i]))
-    print("")
+    print("Whether hunt end:")
+    print(hunt_end)
+    print("Agents in range:")
+    print(in_list)
+    print("gap error")
+    print(gap_error)
 
 
 # 追捕
-def hunt(p_locs, e_loc):
+def hunt(p_locs, e_loc, p):
     env1 = Env(256, 256)  # 实例化 Env 类
-    env1.input(p_locs, e_loc)
+    env1.input(p_locs, e_loc, p)
     global hunt_end
-    vel_xy, hunt_end = env1.run()
-    # output_screen(vel_xy)
+    global in_list
+    global gap_error
+    vel_xy, hunt_end, in_list, gap_error = env1.run()
+    output_screen(vel_xy)
     return vel_xy
+
 
 
 # 围猎
 st8 = ST8()
-def treibjagd(pos_arr):
-    global st8
-    vel_xy = st8.op_vol(pos_arr)
+def treibjagd(pos_arr, txy):
+    vel_xy = st8.op_vol(pos_arr, txy)
     # output_screen(vel_xy)
     return vel_xy
 
@@ -56,11 +60,11 @@ def pos_sub_CB1(pos, pub_list):
     # ============================ 追捕或围猎 ============================
     vel_xy = np.zeros((3, 8), dtype='f8')  # 速度控制
     v_xy = np.zeros((2, 8), dtype='f8')
-    e_loc = [0, 24]  # 目标点位置
+    e_loc = [0.5, 1]  # 目标点位置
     if not hunt_end:
-        v_xy = hunt(p_locs, e_loc)
+        v_xy = hunt(p_locs, e_loc, in_list)
     else:
-        vel_xy = treibjagd(pos_arr)
+        vel_xy = treibjagd(pos_arr, e_loc)
 
     # =============================  发布  =============================
     twist_msg = Twist()

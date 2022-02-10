@@ -410,10 +410,10 @@ public:
     void vel_list_sub_CB(const ground_control_station::Array3::ConstPtr &vel_list, string uavName, ros::Publisher &pub) {
         if(_round_up){
             cout << "round up" << endl;
-            int id = _uavName[3] - '0' - 1;
-            _xCmd = vel_list->x[0];
-            _yCmd = vel_list->y[0];
-            _zCmd = vel_list->z[0];
+            int id = uavName[3] - '0' - 1;
+            _xCmd = vel_list->x[id];
+            _yCmd = vel_list->y[id];
+            _zCmd = vel_list->z[id];
             get_vel();
             pub.publish(_setVelYaw_msg);
         }

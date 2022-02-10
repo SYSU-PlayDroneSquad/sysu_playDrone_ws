@@ -6,40 +6,8 @@
     <arg name="name" default="uav$(arg index)"/>
     <arg name="num" default="4"/>
     
-    <node
-    pkg = "cloud_server_communication"
-    type = "subscribe"
-    name = "$(arg name)_subscribe_node"
-    output = "screen"
-    respawn = "true">
-    <param name="uav_index" type="int" value="$(arg index)"/>
-    <param name="uav_name" type="string" value="$(arg name)"/>
-    <param name="axis_id" type="int" value="$(arg axis)"/>
-    <param name="num_uav" type="int" value="$(arg num)"/>
-    </node>
-
-    <node
-        pkg = "cloud_server_communication"
-        type = "groundStationClient"
-        name = "$(arg name)_client_node"
-        output = "screen"
-        respawn = "true">
-        <param name="uav_index" type="int" value="$(arg index)"/>
-        <param name="uav_name" type="string" value="$(arg name)"/>
-        <param name="axis_id" type="int" value="$(arg axis)"/>
-        <param name="num_uav" type="int" value="$(arg num)"/>
-    </node>
-
     <!-- <node
     pkg = "cloud_server_communication"
-    type = "subscribeGround"
-    name = "$(arg name)_subscribe_node"
-    output = "screen"
-    respawn = "true">
-    <param name="uav_index" type="int" value="$(arg index)"/>
-    <param name="uav_name" type="string" value="$(arg name)"/>
-    <param name="axis_id" type="int<node
-    pkg = "cloud_server_communication"
     type = "subscribe"
     name = "$(arg name)_subscribe_node"
     output = "screen"
@@ -48,9 +16,9 @@
     <param name="uav_name" type="string" value="$(arg name)"/>
     <param name="axis_id" type="int" value="$(arg axis)"/>
     <param name="num_uav" type="int" value="$(arg num)"/>
-    </node>
+    </node> -->
 
-    <node
+    <!-- <node
         pkg = "cloud_server_communication"
         type = "groundStationClient"
         name = "$(arg name)_client_node"
@@ -60,40 +28,51 @@
         <param name="uav_name" type="string" value="$(arg name)"/>
         <param name="axis_id" type="int" value="$(arg axis)"/>
         <param name="num_uav" type="int" value="$(arg num)"/>
-    </node>" value="$(arg axis)"/>
-    <param name="num_uav" type="int" value="$(arg num)"/>
-    <remap from="GPS_position" to="toBeNamed_1"/>
-    <remap from="attitude" to="toBeNamed_2"/>
-    <remap from="status" to="UAVs/status"/>
-    </node>
-
-    <node
-    pkg = "cloud_server_communication"
-    type = "client2ground"
-    name = "$(arg name)_client2ground_node"
-    output = "screen"
-    respawn = "true">
-    <param name="uav_index" type="int" value="$(arg index)"/>
-    <param name="uav_name" type="string" value="$(arg name)"/>
-    <param name="axis_id" type="int" value="$(arg axis)"/>
-    <param name="num_uav" type="int" value="$(arg num)"/>
-    <remap from="~GPS_position" to="$(arg name)/GPS_position"/>
-    <remap from="~attitude" to="$(arg name)/attitude"/>
-    <remap from="GPS_health" to="$(arg name)/GPS_health"/>
     </node> -->
 
     <node
-    pkg = "cloud_server_communication"
-    type = "statusUpdate"
-    name = "$(arg name)_statusUpdate_node"
-    output = "screen"
-    respawn = "true">
-    <param name="uav_index" type="int" value="$(arg index)"/>
-    <param name="uav_name" type="string" value="$(arg name)"/>
-    <param name="axis_id" type="int" value="$(arg axis)"/>
-    <param name="num_uav" type="int" value="$(arg num)"/>
-    <remap from="GPS_position" to="$(arg name)/GPS_position"/>
-    <remap from="attitude" to="$(arg name)/attitude"/>
+        pkg = "cloud_server_communication"
+        type = "client2ground"
+        name = "$(arg name)_client2ground"
+        output = "screen"
+        respawn = "true">
+        <param name="uav_index" type="int" value="$(arg index)"/>
+        <param name="uav_name" type="string" value="$(arg name)"/>
+        <param name="axis_id" type="int" value="$(arg axis)"/>
+        <param name="num_uav" type="int" value="$(arg num)"/>
+        <remap from="GPS_position" to="$(arg name)/dji_sdk/gps_position"/>
+        <remap from="attitude" to="$(arg name)/dji_sdk/attitude"/>
+        <remap from="GPS_health" to="$(arg name)/dji_sdk/gps_health"/>
+        <remap from="flight_status" to="$(arg name)/dji_sdk/flight_status"/>
+    </node>
+
+    <node
+        pkg = "cloud_server_communication"
+        type = "subscribeGround"
+        name = "$(arg name)_subscribeGround"
+        output = "screen"
+        respawn = "true">
+        <param name="uav_index" type="int" value="$(arg index)"/>
+        <param name="uav_name" type="string" value="$(arg name)"/>
+        <param name="axis_id" type="int" value="$(arg axis)"/>
+        <param name="num_uav" type="int" value="$(arg num)"/>
+        <remap from="status" to="UAVs/status"/>
+    </node>
+
+    <node
+        pkg = "cloud_server_communication"
+        type = "statusUpdate"
+        name = "$(arg name)_statusUpdate_node"
+        output = "screen"
+        respawn = "true">
+        <param name="uav_index" type="int" value="$(arg index)"/>
+        <param name="uav_name" type="string" value="$(arg name)"/>
+        <param name="axis_id" type="int" value="$(arg axis)"/>
+        <param name="num_uav" type="int" value="$(arg num)"/>
+        <remap from="GPS_position" to="$(arg name)/dji_sdk/gps_position"/>
+        <remap from="attitude" to="$(arg name)/dji_sdk/attitude"/>
+        <remap from="GPS_health" to="$(arg name)/dji_sdk/gps_health"/>
+        <remap from="flight_status" to="$(arg name)/dji_sdk/flight_status"/>
     </node>
 
 </launch>

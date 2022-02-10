@@ -49,7 +49,10 @@ int sendMsg(delayMessage::DelayMsg delaymsg){
 
 void health_callback(const std_msgs::UInt8::ConstPtr& health){
     delaymsg.set_gps(health->data);
+}
 
+void flightStatusCallback(const std_msgs::UInt8::ConstPtr& flight_status) {
+    delaymsg.set_flight_status(flight_status->data);
 }
 
 void odometryCallback(const geometry_msgs::QuaternionStamped::ConstPtr& att, const sensor_msgs::NavSatFix::ConstPtr& pos){  
@@ -97,7 +100,8 @@ int main(int argc, char** argv)
     //     return -1;
     // }
 
-    ros::Subscriber healthSub = nh.subscribe("GPS_health",10,&health_callback);
+    ros::Subscriber healthSub = nh.subscribe("GPS_health", 10, &health_callback);
+    ros::Subscriber flightStatusSub = nh.subscribe("flight_status", 10, &flightStatusCallback);
     message_filters::Subscriber<geometry_msgs::QuaternionStamped> attitude_sub(nh, "attitude", 1);
     message_filters::Subscriber<sensor_msgs::NavSatFix> position_sub(nh, "GPS_position", 1);
 

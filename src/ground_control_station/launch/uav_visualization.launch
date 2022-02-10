@@ -1,0 +1,7 @@
+<launch>
+    <node name="uav_visualization"
+          pkg="rviz"
+          type="rviz"
+          output="log"
+          args="-d $(find ground_control_station)/rviz/8UAV_visualization.rviz"/>
+</launch>
