@@ -29,7 +29,6 @@ private:
     ground_control_station::Array3 _pos_arr;
     vector<UavMarker> _uav_marker_array;
 
-
     ros::Publisher _pos_pub;
     ros::Subscriber _status_sub;
     ros::Subscriber _key_sub;
@@ -119,9 +118,6 @@ public:
           _pos_z += _height_corrected[i];
       }
     }
-
-
-
 };
 vector<double> GroundControlStation::_height_corrected;
 

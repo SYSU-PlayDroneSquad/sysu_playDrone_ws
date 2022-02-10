@@ -11,7 +11,7 @@ from environment import Env
 from ground_control_station.msg import Array3
 import numpy as np
 
-hunt_end = True
+hunt_end = False
 in_list = [0, 0, 0, 0, 0, 0, 0, 0]
 gap_error = 0
 
