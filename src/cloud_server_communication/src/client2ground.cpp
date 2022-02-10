@@ -34,7 +34,7 @@ int sendMsg(delayMessage::DelayMsg delaymsg){
     zmq_msg_t send_msg;
     zmq_msg_init_size(&send_msg,send_str.length());
     memcpy(zmq_msg_data(&send_msg),send_str.c_str(),send_str.size());
-    
+
     //发送zmq_msg_t
     int send_byte = zmq_msg_send(&send_msg,ground,0);
     ROS_INFO("%s client send message (%d bytes) success.",uavName.c_str(), send_byte);
@@ -49,9 +49,10 @@ int sendMsg(delayMessage::DelayMsg delaymsg){
 
 void health_callback(const std_msgs::UInt8::ConstPtr& health){
     delaymsg.set_gps(health->data);
+
 }
 
-void odometryCallback(const geometry_msgs::QuaternionStamped::ConstPtr& att, const sensor_msgs::NavSatFix::ConstPtr& pos){  
+void odometryCallback(const geometry_msgs::QuaternionStamped::ConstPtr& att, const sensor_msgs::NavSatFix::ConstPtr& pos){
     delaymsg.set_uav_id(uavIndex);
 
     // set header
@@ -105,7 +106,7 @@ int main(int argc, char** argv)
     sync.registerCallback(boost::bind(&odometryCallback, _1, _2));
 
     ros::Rate loop_rate(50);
-    
+
     while(ros::ok()){
         ros::spinOnce();
         loop_rate.sleep();

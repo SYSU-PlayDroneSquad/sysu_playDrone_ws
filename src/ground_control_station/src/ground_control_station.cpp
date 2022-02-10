@@ -21,6 +21,9 @@ int main(int argc, char **argv) {
     double origin_latitude , origin_longitude, origin_altitude;
     nh.getParam("/uavNumbers", uavNumbers);
     nh.getParam("/shape_frame", shape_frame);
+    nh.param("/origin_latitude", origin_latitude, 23.0664710008); // 23.0659742859
+    nh.param("/origin_longitude", origin_longitude, 113.383369912); // 113.383032051
+    nh.param("/origin_altitude", origin_altitude, 100.000); // -81.517552681
     // nh.param("/origin_latitude", origin_latitude, 23.0664710008);// 仿真
     // nh.param("/origin_longitude", origin_longitude, 113.383369912);//
     // nh.param("/origin_altitude", origin_altitude, 100.099998474);//

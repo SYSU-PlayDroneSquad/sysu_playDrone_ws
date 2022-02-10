@@ -25,7 +25,10 @@ message DelayMsg
     // set GPS_health
     uint32 gps = 14;
 
-    bool is_from_keyboard = 15;
+    // set flight_status
+    uint32 flight_status = 15;
+
+    bool is_from_keyboard = 16;
 
     repeated double vl_x = 21;
     repeated double vl_y = 22;

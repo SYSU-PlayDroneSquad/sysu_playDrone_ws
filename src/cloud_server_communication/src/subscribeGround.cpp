@@ -15,6 +15,8 @@
 
 #include "ground_control_station/Status.h"
 #include "ground_control_station/StatusArray.h"
+#include "ground_control_station/StatusNew.h"
+#include "ground_control_station/StatusArrayNew.h"
 
 using namespace std;
 
@@ -29,7 +31,7 @@ ros::Publisher attitudePub;
 ros::Publisher positionPub;
 
 delayMessage::DelayMsg delaymsg;
-ground_control_station::Status status;
+ground_control_station::StatusNew status;
 ros::Time stamp;
 
 void assignStatus() {
@@ -41,6 +43,9 @@ void assignStatus() {
 
     // Assign GPS_health
     status.lv_gps          = delaymsg.gps();
+
+    // Assign flight_status
+    status.flight_status   = delaymsg.flight_status();
 
     // Assign attitude
     status.quaternion.x    = delaymsg.x();
@@ -66,11 +71,11 @@ int main(int argc, char **argv)
     ros::param::get("~uav_name", uavName);
     ros::param::get("~num_uav", numUav);
 
-    ground_control_station::StatusArray statusArray;
-    vector<ground_control_station::Status> statusarr(numUav);
+    ground_control_station::StatusArrayNew statusArray;
+    vector<ground_control_station::StatusNew> statusarr(numUav);
 
     // publish msg to ground control station
-    ros::Publisher statusPub = nh.advertise<ground_control_station::StatusArray>("status", 10);
+    ros::Publisher statusPub = nh.advertise<ground_control_station::StatusArrayNew>("status", 10);
 
    int hwm = 1;
     // 绑定地址
@@ -119,13 +124,13 @@ int main(int argc, char **argv)
                   delaymsg.ParseFromString(str);
                   assignStatus();
 //
-                  ROS_INFO("The status of uav%d : %d", delaymsg.uav_id(), status.lv_gps);
+                  ROS_INFO("The gps level of uav%d : %d", delaymsg.uav_id(), status.lv_gps);
+                  ROS_INFO("The flight status of uav%d : %d", delaymsg.uav_id(), status.lv_gps);
                   ROS_INFO("The sequence: %d, the stamp: %f, the frame_id: %s", status.seq, delaymsg.send_time(), delaymsg.str().c_str());
                   ROS_INFO("The latitude: %f, the longitude: %f, the altitude: %f", status.latitude, status.longitude, status.altitude);
                   ROS_INFO("The x: %f, the y: %f, the z: %f, the w: %f", status.quaternion.x, status.quaternion.y, status.quaternion.z, status.quaternion.w);
 
                   statusarr[status.id - 1] = status;
-
                 }
             }
         }

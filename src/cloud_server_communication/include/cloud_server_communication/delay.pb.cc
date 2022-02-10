@@ -36,7 +36,7 @@ void protobuf_AssignDesc_delay_2eproto() {
       "delay.proto");
   GOOGLE_CHECK(file != NULL);
   DelayMsg_descriptor_ = file->message_type(0);
-  static const int DelayMsg_offsets_[20] = {
+  static const int DelayMsg_offsets_[21] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, cmd_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, str_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, msg_id_),
@@ -53,6 +53,7 @@ void protobuf_AssignDesc_delay_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, z_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, w_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, gps_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, flight_status_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, is_from_keyboard_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, vl_x_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, vl_y_),
@@ -101,15 +102,15 @@ void protobuf_AddDesc_delay_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\013delay.proto\022\014delayMessage\"\237\002\n\010DelayMsg"
+    "\n\013delay.proto\022\014delayMessage\"\266\002\n\010DelayMsg"
     "\022\013\n\003cmd\030d \001(\t\022\013\n\003str\030e \001(\t\022\016\n\006msg_id\030\001 \001"
     "(\r\022\021\n\tsend_time\030\002 \001(\001\022\016\n\006uav_id\030\003 \001(\r\022\013\n"
     "\003lat\030\004 \001(\001\022\013\n\003lon\030\005 \001(\001\022\013\n\003alt\030\006 \001(\001\022\n\n\002"
     "vx\030\007 \001(\001\022\n\n\002vy\030\010 \001(\001\022\n\n\002vz\030\t \001(\001\022\t\n\001x\030\n "
     "\001(\001\022\t\n\001y\030\013 \001(\001\022\t\n\001z\030\014 \001(\001\022\t\n\001w\030\r \001(\001\022\013\n\003"
-    "gps\030\016 \001(\r\022\030\n\020is_from_keyboard\030\017 \001(\010\022\014\n\004v"
-    "l_x\030\025 \003(\001\022\014\n\004vl_y\030\026 \003(\001\022\014\n\004vl_z\030\027 \003(\001b\006p"
-    "roto3", 325);
+    "gps\030\016 \001(\r\022\025\n\rflight_status\030\017 \001(\r\022\030\n\020is_f"
+    "rom_keyboard\030\020 \001(\010\022\014\n\004vl_x\030\025 \003(\001\022\014\n\004vl_y"
+    "\030\026 \003(\001\022\014\n\004vl_z\030\027 \003(\001b\006proto3", 348);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "delay.proto", &protobuf_RegisterTypes);
   DelayMsg::default_instance_ = new DelayMsg();
@@ -143,6 +144,7 @@ const int DelayMsg::kYFieldNumber;
 const int DelayMsg::kZFieldNumber;
 const int DelayMsg::kWFieldNumber;
 const int DelayMsg::kGpsFieldNumber;
+const int DelayMsg::kFlightStatusFieldNumber;
 const int DelayMsg::kIsFromKeyboardFieldNumber;
 const int DelayMsg::kVlXFieldNumber;
 const int DelayMsg::kVlYFieldNumber;
@@ -187,6 +189,7 @@ void DelayMsg::SharedCtor() {
   z_ = 0;
   w_ = 0;
   gps_ = 0u;
+  flight_status_ = 0u;
   is_from_keyboard_ = false;
 }
 
@@ -249,6 +252,7 @@ void DelayMsg::Clear() {
   cmd_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   str_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ZR_(vx_, gps_);
+  flight_status_ = 0u;
   is_from_keyboard_ = false;
 
 #undef ZR_HELPER_
@@ -474,13 +478,28 @@ bool DelayMsg::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(120)) goto parse_is_from_keyboard;
+        if (input->ExpectTag(120)) goto parse_flight_status;
         break;
       }
 
-      // optional bool is_from_keyboard = 15;
+      // optional uint32 flight_status = 15;
       case 15: {
         if (tag == 120) {
+         parse_flight_status:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &flight_status_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(128)) goto parse_is_from_keyboard;
+        break;
+      }
+
+      // optional bool is_from_keyboard = 16;
+      case 16: {
+        if (tag == 128) {
          parse_is_from_keyboard:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
@@ -675,9 +694,14 @@ void DelayMsg::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(14, this->gps(), output);
   }
 
-  // optional bool is_from_keyboard = 15;
+  // optional uint32 flight_status = 15;
+  if (this->flight_status() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(15, this->flight_status(), output);
+  }
+
+  // optional bool is_from_keyboard = 16;
   if (this->is_from_keyboard() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(15, this->is_from_keyboard(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteBool(16, this->is_from_keyboard(), output);
   }
 
   // repeated double vl_x = 21;
@@ -806,9 +830,14 @@ void DelayMsg::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(14, this->gps(), target);
   }
 
-  // optional bool is_from_keyboard = 15;
+  // optional uint32 flight_status = 15;
+  if (this->flight_status() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(15, this->flight_status(), target);
+  }
+
+  // optional bool is_from_keyboard = 16;
   if (this->is_from_keyboard() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(15, this->is_from_keyboard(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(16, this->is_from_keyboard(), target);
   }
 
   // repeated double vl_x = 21;
@@ -973,9 +1002,16 @@ int DelayMsg::ByteSize() const {
         this->gps());
   }
 
-  // optional bool is_from_keyboard = 15;
+  // optional uint32 flight_status = 15;
+  if (this->flight_status() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::UInt32Size(
+        this->flight_status());
+  }
+
+  // optional bool is_from_keyboard = 16;
   if (this->is_from_keyboard() != 0) {
-    total_size += 1 + 1;
+    total_size += 2 + 1;
   }
 
   // repeated double vl_x = 21;
@@ -1101,6 +1137,9 @@ void DelayMsg::MergeFrom(const DelayMsg& from) {
   if (from.gps() != 0) {
     set_gps(from.gps());
   }
+  if (from.flight_status() != 0) {
+    set_flight_status(from.flight_status());
+  }
   if (from.is_from_keyboard() != 0) {
     set_is_from_keyboard(from.is_from_keyboard());
   }
@@ -1146,6 +1185,7 @@ void DelayMsg::InternalSwap(DelayMsg* other) {
   std::swap(z_, other->z_);
   std::swap(w_, other->w_);
   std::swap(gps_, other->gps_);
+  std::swap(flight_status_, other->flight_status_);
   std::swap(is_from_keyboard_, other->is_from_keyboard_);
   vl_x_.UnsafeArenaSwap(&other->vl_x_);
   vl_y_.UnsafeArenaSwap(&other->vl_y_);
@@ -1449,7 +1489,21 @@ void DelayMsg::clear_gps() {
   // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.gps)
 }
 
-// optional bool is_from_keyboard = 15;
+// optional uint32 flight_status = 15;
+void DelayMsg::clear_flight_status() {
+  flight_status_ = 0u;
+}
+ ::google::protobuf::uint32 DelayMsg::flight_status() const {
+  // @@protoc_insertion_point(field_get:delayMessage.DelayMsg.flight_status)
+  return flight_status_;
+}
+ void DelayMsg::set_flight_status(::google::protobuf::uint32 value) {
+  
+  flight_status_ = value;
+  // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.flight_status)
+}
+
+// optional bool is_from_keyboard = 16;
 void DelayMsg::clear_is_from_keyboard() {
   is_from_keyboard_ = false;
 }
