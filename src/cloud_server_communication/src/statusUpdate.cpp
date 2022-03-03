@@ -26,26 +26,9 @@ int main(int argc, char** argv){
     ros::Publisher attitudePub = nh.advertise<geometry_msgs::QuaternionStamped>("attitude", 10);
     ros::Publisher positionPub = nh.advertise<sensor_msgs::NavSatFix>("GPS_position", 10);
     ros::Publisher velocityPub = nh.advertise<ground_control_station::Array3>("vel_list", 10);
-
-    // ros::Rate loop_rate(1);
-
-    // while(ros::ok()){
-    //     nav_msgs::Odometry status_msg;
-    //     status_msg.pose.pose.position.x=rand()%180;
-    //     status_msg.pose.pose.position.y=rand()%90;
-    //     status_msg.pose.pose.position.z=rand()%10000;
-    //     status_msg.twist.twist.linear.x=rand()%10;
-    //     status_msg.twist.twist.linear.y=rand()%10;
-    //     status_msg.twist.twist.linear.z=rand()%10;
-        
-    //     statusPub.publish(status_msg);
-    //     ROS_INFO("%s status update", uavName.c_str());
-
-    //     loop_rate.sleep();
-    // }
-
     ros::Publisher healthPub = nh.advertise<std_msgs::UInt8>("GPS_health", 10);
     ros::Publisher flightStatusPub = nh.advertise<std_msgs::UInt8>("flight_status", 10);
+    ros::Publisher targetPub = nh.advertise<sensor_msgs::NavSatFix>("target_position", 10);
 
     ros::Rate loop_rate(1);
 
@@ -83,6 +66,14 @@ int main(int argc, char** argv){
 
         positionPub.publish(pos);
         attitudePub.publish(att);
+
+        // target_position initialization
+        sensor_msgs::NavSatFix target_pos;
+        target_pos.latitude = rand()%1000;
+        target_pos.longitude = rand()%1000;
+        target_pos.altitude = rand()%100;
+
+        targetPub.publish(target_pos);
 
         // // vel_list initialization
         // ground_control_station::Array3 vel;

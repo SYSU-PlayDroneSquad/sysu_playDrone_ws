@@ -36,7 +36,7 @@ void protobuf_AssignDesc_delay_2eproto() {
       "delay.proto");
   GOOGLE_CHECK(file != NULL);
   DelayMsg_descriptor_ = file->message_type(0);
-  static const int DelayMsg_offsets_[21] = {
+  static const int DelayMsg_offsets_[24] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, cmd_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, str_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, msg_id_),
@@ -55,6 +55,9 @@ void protobuf_AssignDesc_delay_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, gps_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, flight_status_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, is_from_keyboard_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, target_lat_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, target_lon_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, target_alt_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, vl_x_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, vl_y_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DelayMsg, vl_z_),
@@ -102,15 +105,17 @@ void protobuf_AddDesc_delay_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\013delay.proto\022\014delayMessage\"\266\002\n\010DelayMsg"
+    "\n\013delay.proto\022\014delayMessage\"\362\002\n\010DelayMsg"
     "\022\013\n\003cmd\030d \001(\t\022\013\n\003str\030e \001(\t\022\016\n\006msg_id\030\001 \001"
     "(\r\022\021\n\tsend_time\030\002 \001(\001\022\016\n\006uav_id\030\003 \001(\r\022\013\n"
     "\003lat\030\004 \001(\001\022\013\n\003lon\030\005 \001(\001\022\013\n\003alt\030\006 \001(\001\022\n\n\002"
     "vx\030\007 \001(\001\022\n\n\002vy\030\010 \001(\001\022\n\n\002vz\030\t \001(\001\022\t\n\001x\030\n "
     "\001(\001\022\t\n\001y\030\013 \001(\001\022\t\n\001z\030\014 \001(\001\022\t\n\001w\030\r \001(\001\022\013\n\003"
     "gps\030\016 \001(\r\022\025\n\rflight_status\030\017 \001(\r\022\030\n\020is_f"
-    "rom_keyboard\030\020 \001(\010\022\014\n\004vl_x\030\025 \003(\001\022\014\n\004vl_y"
-    "\030\026 \003(\001\022\014\n\004vl_z\030\027 \003(\001b\006proto3", 348);
+    "rom_keyboard\030\020 \001(\010\022\022\n\ntarget_lat\030\021 \001(\001\022\022"
+    "\n\ntarget_lon\030\022 \001(\001\022\022\n\ntarget_alt\030\023 \001(\001\022\014"
+    "\n\004vl_x\030\025 \003(\001\022\014\n\004vl_y\030\026 \003(\001\022\014\n\004vl_z\030\027 \003(\001"
+    "b\006proto3", 408);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "delay.proto", &protobuf_RegisterTypes);
   DelayMsg::default_instance_ = new DelayMsg();
@@ -146,6 +151,9 @@ const int DelayMsg::kWFieldNumber;
 const int DelayMsg::kGpsFieldNumber;
 const int DelayMsg::kFlightStatusFieldNumber;
 const int DelayMsg::kIsFromKeyboardFieldNumber;
+const int DelayMsg::kTargetLatFieldNumber;
+const int DelayMsg::kTargetLonFieldNumber;
+const int DelayMsg::kTargetAltFieldNumber;
 const int DelayMsg::kVlXFieldNumber;
 const int DelayMsg::kVlYFieldNumber;
 const int DelayMsg::kVlZFieldNumber;
@@ -191,6 +199,9 @@ void DelayMsg::SharedCtor() {
   gps_ = 0u;
   flight_status_ = 0u;
   is_from_keyboard_ = false;
+  target_lat_ = 0;
+  target_lon_ = 0;
+  target_alt_ = 0;
 }
 
 DelayMsg::~DelayMsg() {
@@ -252,7 +263,7 @@ void DelayMsg::Clear() {
   cmd_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   str_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ZR_(vx_, gps_);
-  flight_status_ = 0u;
+  ZR_(flight_status_, target_alt_);
   is_from_keyboard_ = false;
 
 #undef ZR_HELPER_
@@ -508,6 +519,51 @@ bool DelayMsg::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
+        if (input->ExpectTag(137)) goto parse_target_lat;
+        break;
+      }
+
+      // optional double target_lat = 17;
+      case 17: {
+        if (tag == 137) {
+         parse_target_lat:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &target_lat_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(145)) goto parse_target_lon;
+        break;
+      }
+
+      // optional double target_lon = 18;
+      case 18: {
+        if (tag == 145) {
+         parse_target_lon:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &target_lon_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(153)) goto parse_target_alt;
+        break;
+      }
+
+      // optional double target_alt = 19;
+      case 19: {
+        if (tag == 153) {
+         parse_target_alt:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &target_alt_)));
+
+        } else {
+          goto handle_unusual;
+        }
         if (input->ExpectTag(170)) goto parse_vl_x;
         break;
       }
@@ -704,6 +760,21 @@ void DelayMsg::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteBool(16, this->is_from_keyboard(), output);
   }
 
+  // optional double target_lat = 17;
+  if (this->target_lat() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(17, this->target_lat(), output);
+  }
+
+  // optional double target_lon = 18;
+  if (this->target_lon() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(18, this->target_lon(), output);
+  }
+
+  // optional double target_alt = 19;
+  if (this->target_alt() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(19, this->target_alt(), output);
+  }
+
   // repeated double vl_x = 21;
   if (this->vl_x_size() > 0) {
     ::google::protobuf::internal::WireFormatLite::WriteTag(21, ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED, output);
@@ -838,6 +909,21 @@ void DelayMsg::SerializeWithCachedSizes(
   // optional bool is_from_keyboard = 16;
   if (this->is_from_keyboard() != 0) {
     target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(16, this->is_from_keyboard(), target);
+  }
+
+  // optional double target_lat = 17;
+  if (this->target_lat() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(17, this->target_lat(), target);
+  }
+
+  // optional double target_lon = 18;
+  if (this->target_lon() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(18, this->target_lon(), target);
+  }
+
+  // optional double target_alt = 19;
+  if (this->target_alt() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(19, this->target_alt(), target);
   }
 
   // repeated double vl_x = 21;
@@ -1014,6 +1100,21 @@ int DelayMsg::ByteSize() const {
     total_size += 2 + 1;
   }
 
+  // optional double target_lat = 17;
+  if (this->target_lat() != 0) {
+    total_size += 2 + 8;
+  }
+
+  // optional double target_lon = 18;
+  if (this->target_lon() != 0) {
+    total_size += 2 + 8;
+  }
+
+  // optional double target_alt = 19;
+  if (this->target_alt() != 0) {
+    total_size += 2 + 8;
+  }
+
   // repeated double vl_x = 21;
   {
     int data_size = 0;
@@ -1143,6 +1244,15 @@ void DelayMsg::MergeFrom(const DelayMsg& from) {
   if (from.is_from_keyboard() != 0) {
     set_is_from_keyboard(from.is_from_keyboard());
   }
+  if (from.target_lat() != 0) {
+    set_target_lat(from.target_lat());
+  }
+  if (from.target_lon() != 0) {
+    set_target_lon(from.target_lon());
+  }
+  if (from.target_alt() != 0) {
+    set_target_alt(from.target_alt());
+  }
 }
 
 void DelayMsg::CopyFrom(const ::google::protobuf::Message& from) {
@@ -1187,6 +1297,9 @@ void DelayMsg::InternalSwap(DelayMsg* other) {
   std::swap(gps_, other->gps_);
   std::swap(flight_status_, other->flight_status_);
   std::swap(is_from_keyboard_, other->is_from_keyboard_);
+  std::swap(target_lat_, other->target_lat_);
+  std::swap(target_lon_, other->target_lon_);
+  std::swap(target_alt_, other->target_alt_);
   vl_x_.UnsafeArenaSwap(&other->vl_x_);
   vl_y_.UnsafeArenaSwap(&other->vl_y_);
   vl_z_.UnsafeArenaSwap(&other->vl_z_);
@@ -1515,6 +1628,48 @@ void DelayMsg::clear_is_from_keyboard() {
   
   is_from_keyboard_ = value;
   // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.is_from_keyboard)
+}
+
+// optional double target_lat = 17;
+void DelayMsg::clear_target_lat() {
+  target_lat_ = 0;
+}
+ double DelayMsg::target_lat() const {
+  // @@protoc_insertion_point(field_get:delayMessage.DelayMsg.target_lat)
+  return target_lat_;
+}
+ void DelayMsg::set_target_lat(double value) {
+  
+  target_lat_ = value;
+  // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.target_lat)
+}
+
+// optional double target_lon = 18;
+void DelayMsg::clear_target_lon() {
+  target_lon_ = 0;
+}
+ double DelayMsg::target_lon() const {
+  // @@protoc_insertion_point(field_get:delayMessage.DelayMsg.target_lon)
+  return target_lon_;
+}
+ void DelayMsg::set_target_lon(double value) {
+  
+  target_lon_ = value;
+  // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.target_lon)
+}
+
+// optional double target_alt = 19;
+void DelayMsg::clear_target_alt() {
+  target_alt_ = 0;
+}
+ double DelayMsg::target_alt() const {
+  // @@protoc_insertion_point(field_get:delayMessage.DelayMsg.target_alt)
+  return target_alt_;
+}
+ void DelayMsg::set_target_alt(double value) {
+  
+  target_alt_ = value;
+  // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.target_alt)
 }
 
 // repeated double vl_x = 21;

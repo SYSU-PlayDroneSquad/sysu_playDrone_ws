@@ -30,6 +30,10 @@ message DelayMsg
 
     bool is_from_keyboard = 16;
 
+    double target_lat = 17;//目标的纬度
+    double target_lon = 18;//目标的经度
+    double target_alt = 19;//目标的高度，米
+
     repeated double vl_x = 21;
     repeated double vl_y = 22;
     repeated double vl_z = 23;

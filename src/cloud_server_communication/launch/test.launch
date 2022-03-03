@@ -4,7 +4,7 @@
     <arg name="axis" default="2"/><!--坐标系：1为全局自然坐标系，2为局部实验坐标系-->
     <arg name="index" default="0"/>
     <arg name="name" default="uav$(arg index)"/>
-    <arg name="num" default="4"/>
+    <arg name="num" default="50"/>
     
     <!-- <node
     pkg = "cloud_server_communication"
@@ -44,6 +44,7 @@
         <remap from="attitude" to="$(arg name)/dji_sdk/attitude"/>
         <remap from="GPS_health" to="$(arg name)/dji_sdk/gps_health"/>
         <remap from="flight_status" to="$(arg name)/dji_sdk/flight_status"/>
+        <remap from="target_position" to="tag/refine/gps_position"/>
     </node>
 
     <node
@@ -73,6 +74,7 @@
         <remap from="attitude" to="$(arg name)/dji_sdk/attitude"/>
         <remap from="GPS_health" to="$(arg name)/dji_sdk/gps_health"/>
         <remap from="flight_status" to="$(arg name)/dji_sdk/flight_status"/>
+        <remap from="target_position" to="/tag/refine/gps_position"/>
     </node>
 
 </launch>

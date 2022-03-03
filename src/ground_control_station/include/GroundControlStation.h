@@ -59,7 +59,7 @@ public:
             UavMarker marker(_nh, "uav" + std::to_string(i));
             _uav_marker_array.emplace_back(marker);
         }
-        // 设置原点
+        // 设置本地坐标系原点
         gps2enu.Reset(latitude, longitude, altitude);
         // ros
         _pos_pub = _nh.advertise<ground_control_station::Array3>("/position_list", 10);

@@ -25,6 +25,7 @@ void* subscriber = zmq_socket(ctx, ZMQ_SUB);
 vector<void*> subscriberList = vector<void*>(51, zmq_socket(ctx, ZMQ_SUB));
 string uavName("uav");
 int numUav;
+int scout_index;
 int seq[51];
 
 ros::Publisher attitudePub;
@@ -70,12 +71,15 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     ros::param::get("~uav_name", uavName);
     ros::param::get("~num_uav", numUav);
+    ros::param::get("~scout_index", scout_index);
 
     ground_control_station::StatusArrayNew statusArray;
     vector<ground_control_station::StatusNew> statusarr(numUav);
+    sensor_msgs::NavSatFix target_pos;
 
     // publish msg to ground control station
     ros::Publisher statusPub = nh.advertise<ground_control_station::StatusArrayNew>("status", 10);
+    ros::Publisher targetPub = nh.advertise<sensor_msgs::NavSatFix>("target_position", 1);
 
    int hwm = 1;
     // 绑定地址
@@ -132,10 +136,30 @@ int main(int argc, char **argv)
 
                   statusarr[status.id - 1] = status;
                 }
+
+                // Assign target_position
+                if (i == scout_index)
+                {
+                    stamp.sec = delaymsg.send_time();
+                    // Assign header
+                    target_pos.header.seq      = delaymsg.msg_id();
+                    target_pos.header.stamp    = stamp;
+                    target_pos.header.frame_id = delaymsg.str();
+
+                    // assign GPS_position
+                    target_pos.latitude        = delaymsg.target_lat();
+                    target_pos.longitude       = delaymsg.target_lon();
+                    target_pos.altitude        = delaymsg.target_alt();
+
+                    ROS_INFO("The latitude: %f, the longitude: %f, the altitude: %f", target_pos.latitude, target_pos.longitude, target_pos.altitude);
+                }
             }
         }
         statusArray.StatusArray = statusarr;
         statusPub.publish(statusArray);
+        // If target is found, deliver its position
+        if (target_pos.latitude > 0.1)
+            targetPub.publish(target_pos);
 
         // std::cout << ros::Time::now() - start_time << std::endl;
         // start_time = ros::Time::now();

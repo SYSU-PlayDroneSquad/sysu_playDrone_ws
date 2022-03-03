@@ -31,9 +31,9 @@ public:
 
     ~UavStatusUpdate()= default;
 
-    void data_handing(unsigned int id, unsigned int lv_gps, unsigned flight_status, double &height){
+    void data_handing(unsigned int id, unsigned int lv_gps, unsigned int flight_status, double &height){
         push_uavName(id);
-        push_item(id, lv_gps, height);
+        push_item(id, lv_gps, height, flight_status);
         // output();
     }
 
@@ -96,10 +96,10 @@ public:
 
 
     // 把无人机的状态条目 push 到 _status
-    void push_item(unsigned int &id, unsigned int &lv_gps, double &height) const{
+    void push_item(unsigned int &id, unsigned int &lv_gps, double &height, unsigned int flight_status) const{
         string uavName = "uav " + std::to_string(id);
         string icon_gps;
-        if(height < 0.1) height = 0;
+        if(height < 0.1) height = 0.00;
 
         switch (lv_gps) {
             case 5: icon_gps = _lv_5; break;
@@ -114,6 +114,7 @@ public:
             if(uavName == _status[i][0]){
                 _status[i][2] = icon_gps;
                 _status[i][3] = precision(height);
+                _status[i][4] = motor_status(flight_status);
                 int count = atoi(_status[i][1].c_str());
                 count++;
                 _status[i][1] = std::to_string(count);
@@ -124,17 +125,29 @@ public:
     // 数据精度
     string precision(const double &value) const {
         std::stringstream ss;
-        ss << setprecision(3) << value;
+        ss << setprecision(3) << value; // 保留 3 位有效数字
         string result;
         return ss.str();
-
     }
+
+    // 电机状态
+    string motor_status(unsigned int &flight_status) const {
+        string motor_status;
+        switch (flight_status){
+            case 0: motor_status = "\33[31moff\33[0m"; break;
+            case 1: motor_status = "\33[32mon\33[0m"; break;
+            case 2: motor_status = "\33[32minflight\33[0m"; break;
+            default: motor_status = " "; break;
+        }
+        return motor_status;
+    }
+
 
     // 输出到屏幕
     void output() const{
         system("clear");
-        string header =  "编号        GPS         高度(m)      电机         电量  ";
-        string line   =  "——————————————————————————————————————————————————————";
+        string header =  "编号        GPS         高度(m)      电机    ";
+        string line   =  "——————————————————————————————————————————————";
         string flash  =  "\33[37m☁\33[0m";
 
         switch (_flash++) {
@@ -145,7 +158,7 @@ public:
         int empty = 0;
         for(int i = 0; i < _uavNumbers; i++){
             if(!_status[i][0].empty()){
-                 cout << left << setw(12) << _status[i][0] << _status[i][2] << _status[i][3] << endl;
+                 cout << left << setw(12) << _status[i][0] << _status[i][2] << setw(12) << _status[i][3] << _status[i][4] << endl;
                 // cout << _status[i][3] << endl;
             } else {
                 empty++;
@@ -163,6 +176,7 @@ public:
                 if(_status[i][1] < "1"){
                     _status[i][2] = "\33[31m        Link  down!       \33[0m";
                     _status[i][3] = " ";
+                    _status[i][4] = " ";
                 }
                 _status[i][1] = "0";
                 output();

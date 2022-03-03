@@ -218,6 +218,24 @@ class DelayMsg : public ::google::protobuf::Message /* @@protoc_insertion_point(
   bool is_from_keyboard() const;
   void set_is_from_keyboard(bool value);
 
+  // optional double target_lat = 17;
+  void clear_target_lat();
+  static const int kTargetLatFieldNumber = 17;
+  double target_lat() const;
+  void set_target_lat(double value);
+
+  // optional double target_lon = 18;
+  void clear_target_lon();
+  static const int kTargetLonFieldNumber = 18;
+  double target_lon() const;
+  void set_target_lon(double value);
+
+  // optional double target_alt = 19;
+  void clear_target_alt();
+  static const int kTargetAltFieldNumber = 19;
+  double target_alt() const;
+  void set_target_alt(double value);
+
   // repeated double vl_x = 21;
   int vl_x_size() const;
   void clear_vl_x();
@@ -276,6 +294,9 @@ class DelayMsg : public ::google::protobuf::Message /* @@protoc_insertion_point(
   double w_;
   ::google::protobuf::uint32 gps_;
   ::google::protobuf::uint32 flight_status_;
+  double target_lat_;
+  double target_lon_;
+  double target_alt_;
   ::google::protobuf::RepeatedField< double > vl_x_;
   mutable int _vl_x_cached_byte_size_;
   ::google::protobuf::RepeatedField< double > vl_y_;
@@ -609,6 +630,48 @@ inline void DelayMsg::set_is_from_keyboard(bool value) {
   
   is_from_keyboard_ = value;
   // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.is_from_keyboard)
+}
+
+// optional double target_lat = 17;
+inline void DelayMsg::clear_target_lat() {
+  target_lat_ = 0;
+}
+inline double DelayMsg::target_lat() const {
+  // @@protoc_insertion_point(field_get:delayMessage.DelayMsg.target_lat)
+  return target_lat_;
+}
+inline void DelayMsg::set_target_lat(double value) {
+  
+  target_lat_ = value;
+  // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.target_lat)
+}
+
+// optional double target_lon = 18;
+inline void DelayMsg::clear_target_lon() {
+  target_lon_ = 0;
+}
+inline double DelayMsg::target_lon() const {
+  // @@protoc_insertion_point(field_get:delayMessage.DelayMsg.target_lon)
+  return target_lon_;
+}
+inline void DelayMsg::set_target_lon(double value) {
+  
+  target_lon_ = value;
+  // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.target_lon)
+}
+
+// optional double target_alt = 19;
+inline void DelayMsg::clear_target_alt() {
+  target_alt_ = 0;
+}
+inline double DelayMsg::target_alt() const {
+  // @@protoc_insertion_point(field_get:delayMessage.DelayMsg.target_alt)
+  return target_alt_;
+}
+inline void DelayMsg::set_target_alt(double value) {
+  
+  target_alt_ = value;
+  // @@protoc_insertion_point(field_set:delayMessage.DelayMsg.target_alt)
 }
 
 // repeated double vl_x = 21;

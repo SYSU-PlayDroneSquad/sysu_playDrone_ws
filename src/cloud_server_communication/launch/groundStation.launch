@@ -4,7 +4,7 @@
     <arg name="axis" default="2"/><!--坐标系：1为全局自然坐标系，2为局部实验坐标系-->
     <arg name="index" default="0"/>
     <arg name="name" default="groundStation"/>
-    <arg name="num" default="10"/>
+    <arg name="num" default="50"/>
 
     <node
         pkg = "cloud_server_communication"
@@ -29,6 +29,7 @@
         <param name="axis_id" type="int" value="$(arg axis)"/>
         <param name="num_uav" type="int" value="$(arg num)"/>
         <remap from="status" to="UAVs/status"/>
+        <remap from="target_position" to="to_be_filled"/>
     </node>
 
 </launch>

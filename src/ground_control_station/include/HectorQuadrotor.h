@@ -24,20 +24,13 @@ public:
 
          // 初始化无人机位置消息
          _position_msg.header.frame_id = _flame_world;
+         _home_position_msg.header.frame_id = _flame_world;
+         _home_position_msg.pose.orientation.x = 0.0;
+         _home_position_msg.pose.orientation.y = 0.0;
+         _home_position_msg.pose.orientation.z = 0.0;
+         _home_position_msg.pose.orientation.w = 1.0;
          // 初始化 home 点
-         std::vector<double> pos_xy;
-         pos_xy.resize(2);
-         double radius = 4;
-         double pos = 2.828427;
-         _home_position.resize(8, pos_xy);
-         _home_position[0][0] = radius; _home_position[0][1] = 0;
-         _home_position[1][0] = pos; _home_position[1][1] = pos;
-         _home_position[2][0] = 0; _home_position[2][1] = radius;
-         _home_position[3][0] = -pos; _home_position[3][1] = pos;
-         _home_position[4][0] = -radius; _home_position[4][1] = 0;
-         _home_position[5][0] = -pos; _home_position[5][1] = -pos;
-         _home_position[6][0] = 0; _home_position[6][1] = -radius;
-         _home_position[7][0] = pos; _home_position[7][1] = -pos;
+
 
          // 初始化无人机速度消息
         _twist_msg.linear.x = _twist_msg.linear.y = _twist_msg.linear.z = 0;
@@ -78,6 +71,11 @@ public:
         // 当前位置赋值
         _position_msg.pose.position.x = _uav_state.response.pose.position.x;
         _position_msg.pose.position.y = _uav_state.response.pose.position.y;
+        // home 点赋值
+        _home_position_msg.pose.position.x = _uav_state.response.pose.position.x;
+        _home_position_msg.pose.position.y = _uav_state.response.pose.position.y;
+        _home_position_msg.pose.position.z = _height;
+
         // 起飞
         if (_uav_state.response.pose.position.z < 0.3) {
             _position_msg.pose.position.z = _height;
@@ -218,11 +216,7 @@ public:
      }
 
      void go_home(){
-        int id = _uavName[3] - '0' -1;
-        _position_msg.pose.position.x = _home_position[id][0];
-        _position_msg.pose.position.y = _home_position[id][1];
-        _position_msg.pose.position.z = _height;
-        _position_pub.publish(_position_msg);
+        _position_pub.publish(_home_position_msg);
          cout << _uavName << " send go_home success!" << endl;
      }
 
@@ -256,12 +250,13 @@ private:
     int _height;
     int _vel_limt;
     double _setp;
-    std::vector<std::vector<double >> _home_position;
+
 
     /// gazebo 仿真
     //  位置发布
     ros::Publisher _position_pub;
     geometry_msgs::PoseStamped _position_msg;
+    geometry_msgs::PoseStamped _home_position_msg;
     //  速度发布
     ros::Publisher _twist_pub;
     geometry_msgs::Twist _twist_msg;
