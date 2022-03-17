@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
     ros::NodeHandle nh;
 
     // 从参数服务器获取参数
-    int uavNumbers(8);
+    int uavNumbers(48);
     string shape_frame("+");
     double origin_latitude , origin_longitude, origin_altitude;
     nh.getParam("/uavNumbers", uavNumbers);

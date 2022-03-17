@@ -1,0 +1,9 @@
+<library path="lib/libground_control_station2">
+    <class name="ground_control_station2/GroundStation2"
+           type="ground_control_station2::GroundStation2"
+           base_class_type="rviz::Panel">
+        <description>
+            test1.
+        </description>
+    </class>
+</library>

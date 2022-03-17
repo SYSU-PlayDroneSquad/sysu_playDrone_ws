@@ -35,6 +35,7 @@ msg = """
  |        3 : Switch single mode         |
  |        4 : Round up                   |
  |        5 : Correcte height            |
+ |        6 : input id
  |        Tab: Switch frame              |     
  |                                       | 
  =========================================
@@ -43,6 +44,8 @@ CTRL-C to quit
 
 """
 single_mode = False
+zhaji = False
+zhaji_id = '0'
 cmd = 'illegal'
 uavName = 'uav1'
 
@@ -83,9 +86,27 @@ def switch_single_mode(single_mode):
     else:
         print('\n============ Enter group mode ============\n')
 
+def input_zhaji():
+    global zhaji
+    if zhaji:
+        print('\n============ Enter debug mode ============')
+        print('\nPlease input number of quadrotors(eg. 33) :')
+        cut_mode = False
+        timeout = 1000
+        id_tmp = get_key(cut_mode, timeout)
+        id = id_tmp.replace('\r', '').replace('\n', '').replace('\t', '')
+        # 字符串切片，截取uavNumber开头到字符'#'的字符（去除回车符号）
+        # uavName = 'uav' + uavNumber[:uavNumber.find('#') + 1]
+        zhaji = False
+        print("id = ", id)
+        id_pub = rospy.Publisher('/input_id', String, queue_size=1)
+        id_pub.publish(id)
+        print('\n============ End debug mode ============\n')
+        return id
 
 def tasks_publish(pub, key):
     global single_mode
+    global zhaji
     global cmd
     global uavName
     if key == '0':
@@ -101,6 +122,10 @@ def tasks_publish(pub, key):
         cmd = 'RoundUp'
     elif key == '5':
         cmd = 'CorrecteHeight'
+    elif key == '6':
+        zhaji = bool(1 - zhaji)
+        zhaji_id = input_zhaji()
+        print("id = ", zhaji_id)
     elif key == 'w':
         cmd = 'Forward'
     elif key == 's':
@@ -125,6 +150,10 @@ def tasks_publish(pub, key):
         cmd = 'Stop'
     elif key == '\x09':
         cmd = 'switchFrame'
+    elif key == 'v':
+        cmd = 'v'
+    elif key == 'b':
+        cmd = 'b'
     # elif key == '4':
     #     cmd = 'SetLocalFrame'
     else:

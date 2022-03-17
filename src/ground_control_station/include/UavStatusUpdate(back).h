@@ -23,12 +23,12 @@ public:
         _uavNumbers = uavNumbers;
         _full = false;
 
-//        _visual_status_array_msg.StatusArray.resize(_uavNumbers);
-//        for(int i(0); i < _uavNumbers; i++){
-//            _visual_status_array_msg.StatusArray[i].status.resize(4);
-//        }
-//
-//        _visual_status_pub = _nh.advertise<ground_control_station::VisualStatusArray>("/visual_status",10);
+        _visual_status_array_msg.StatusArray.resize(_uavNumbers);
+        for(int i(0); i < _uavNumbers; i++){
+            _visual_status_array_msg.StatusArray[i].status.resize(4);
+        }
+
+        _visual_status_pub = _nh.advertise<ground_control_station::VisualStatusArray>("/visual_status",10);
 
         string space = " "; space.resize(8, ' ');
         _lv_5 = "\33[31m▮\33[35m▮\33[33m▮\33[32m▮▮\33[0m" + space;
@@ -184,14 +184,14 @@ public:
         }
     }
 
-//    void pub_status(){
-//        for(int i(0); i < _uavNumbers; i++){
-//            for(int j(0); j < 4; j++){
-//                _visual_status_array_msg.StatusArray[i].status[j] = _status[i][j];
-//            }
-//        }
-//        _visual_status_pub.publish(_visual_status_array_msg);
-//    }
+    void pub_status(){
+        for(int i(0); i < _uavNumbers; i++){
+            for(int j(0); j < 4; j++){
+                _visual_status_array_msg.StatusArray[i].status[j] = _status[i][j];
+            }
+        }
+        _visual_status_pub.publish(_visual_status_array_msg);
+    }
 
     // 检查链接通断
     void check_status_CB(const ros::TimerEvent &event) {
@@ -219,7 +219,7 @@ private:
     static int _flash;
     string _lv_0; string _lv_1; string _lv_2;
     string _lv_3; string _lv_4; string _lv_5;
-//    ground_control_station::VisualStatusArray _visual_status_array_msg;
+    ground_control_station::VisualStatusArray _visual_status_array_msg;
     ros::Publisher _visual_status_pub;
     ros::Timer _check_status;
 };

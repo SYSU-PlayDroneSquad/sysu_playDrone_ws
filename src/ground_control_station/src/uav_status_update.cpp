@@ -6,7 +6,7 @@
 #include "UavStatusUpdate.h"
 
 void statusSubCB(const std_msgs::String::ConstPtr& msg, UavStatusUpdate update){
-    update.data_handing(msg -> data);
+    // update.data_handing(若干参数);
 }
 
 int main(int argc, char **argv){

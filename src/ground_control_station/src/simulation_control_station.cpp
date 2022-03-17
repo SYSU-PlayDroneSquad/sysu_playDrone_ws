@@ -14,7 +14,7 @@ using std::string;
 // gazebo 键盘控制
 void ctrl_keyCB(const std_msgs::String::ConstPtr cmd, UavGroup<HectorQuadrotor> &controller) {
     string data = cmd->data;
-    controller.baseControl(data);
+    controller.check_data(data);
 }
 // gazebo 位置控制
 void set_group_position_CB(const sensor_msgs::Joy::ConstPtr msg, UavGroup<HectorQuadrotor> &controller){// 待完善

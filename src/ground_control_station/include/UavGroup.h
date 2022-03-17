@@ -33,11 +33,28 @@ public:
         }
     }
 
-    void check_data(){
-
+    void check_data(string data){
+        string check = "empty";
+        check = data.substr(0,3);
+        // 判断是否为单机控制
+        if(check == "uav"){
+            check = data.substr(data.find('v') + 1, data.find('#') - data.find('v') - 1);
+            // cout << "uav = " << check << endl;
+            int id = std::stoi(check);
+            data = data.substr(data.find('#') + 1);
+            // cout << data << endl;
+            singleControl(data, id - 1);
+        } else if(check == "lan") {
+            land_list_handling(data);
+        } else if(check == "Wav"){
+            cout << "uav25 start run with wave path" << endl;
+            _uav_group[24].wave();
+        } else { // 不是单机的话直接执行指令
+            baseControl(data);
+        }
     }
 
-    void baseControl(const std::string data){
+    void baseControl(const std::string& data){
         if (data == "MotorUnlock") {
             for(int i = 0; i < _uavNumbers; i++){
                 _uav_group[i].motor_control();
@@ -95,6 +112,49 @@ public:
                 _uav_group[i].go_home();
             }
         }
+    }
+
+    void singleControl(const std::string& data, int i){
+        if (data == "MotorUnlock") {
+            _uav_group[i].motor_control();
+        } else if (data == "Takeoff") {
+            _uav_group[i].takeoff();
+        } else if (data == "Land"){
+            _uav_group[i].land();
+        } else if (data == "Stop"){
+            _uav_group[i].stop();
+        } else if (data == "Forward"){
+            _uav_group[i].forward();
+        } else if (data == "Backward"){
+            _uav_group[i].backward();
+        } else if (data == "TurnLeft"){
+            _uav_group[i].turn_left();
+        } else if (data == "TurnRight"){
+            _uav_group[i].turn_right();
+        } else if (data == "Upward"){
+            _uav_group[i].upward();
+        } else if (data == "Down"){
+            _uav_group[i].down();
+        } else if (data == "RotateRight"){
+            _uav_group[i].rotate_right();
+        } else if (data == "RotateLeft"){
+            _uav_group[i].rotate_left();
+        } else if (data == "switchFrame"){
+//            for(int i = 0; i < _uavNumbers; i++){
+//                _uav_group[i].switch_frame();
+//            }
+        } else if (data == "GoHome"){
+            _uav_group[i].go_home();
+        }
+    }
+
+    void land_list_handling(std::string data){
+        for(int i(0); i < 4; i++){
+            data = data.substr(data.find('#') + 1);
+            int id = std::stoi(data.substr(0,data.find('#')));
+            _uav_group[id - 1].land();
+        }
+
     }
 
     void pos_globalControl(sensor_msgs::Joy pos){

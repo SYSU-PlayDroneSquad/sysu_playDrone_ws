@@ -105,12 +105,13 @@ class Env(object):
 
         self.agents.get_relative_angle(self.evaders.evaders[0].loc)
         self.agents.whether_in_range(self.evaders.evaders[0].loc)
+        self.agents.get_too_close()
 
         self.agents.get_all_gap()
         self.agents.get_v(self.evaders.evaders[0].loc, self.evaders.evaders[0].v)
 
-        status, gap_error = self.agents.whether_complete()
-        v = np.zeros((2, 8), dtype='f8')
+        status, gap_error, seq = self.agents.whether_complete()
+        v = np.zeros((2, 48), dtype='f8')
 
 
         self.agents.move()
@@ -124,17 +125,20 @@ class Env(object):
         l = self.agents.in_range_list()
 
 
-        return v, status, l, gap_error
+        return v, status, l, gap_error, seq
 
 
     def input(self, locs, e_loc, l):
 
-        i = 0
-        for p in locs:
-            loc = np.array([p[0], p[1]])
-            a = Agent(i, loc, 1, 8, l[i])
+        for i in range(len(locs)):
+            loc = np.array([locs[i][0], locs[i][1]])
+            if i <= 7:
+                a = Agent(i, loc, 1, 10, l[i])
+            if 8 <= i <= 23:
+                a = Agent(i, loc, 2, 20, l[i])
+            if 23 <= i <= 48:
+                a = Agent(i, loc, 3, 26, l[i])
             self.agents.agents.append(a)
-            i = i + 1
 
         e = Evader(1, e_loc)
         self.evaders.evaders.append(e)

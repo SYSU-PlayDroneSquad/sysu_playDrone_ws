@@ -6,17 +6,19 @@ import rospy
 from geometry_msgs.msg import Twist
 
 # import other files
-from fifty_8test_rt import ST8
+from fifty_48test_rt import ST8
 from environment import Env
 from ground_control_station.msg import Array3
 import numpy as np
 
 hunt_end = False
-in_list = [0, 0, 0, 0, 0, 0, 0, 0]
+in_list = np.transpose(np.zeros(48))
 gap_error = 0
+g_seq = []
+
 
 # 输出控制速度到屏幕
-def output_screen(vel_xy):
+def output_screen(vel_xy, seqq):
    # for i in range(8):
         #print('x' + str(i) + ' = ' + str(vel_xy[0][i])
             #  + '  y' + str(i) + ' = ' + str(vel_xy[1][i])
@@ -28,6 +30,8 @@ def output_screen(vel_xy):
     print(in_list)
     print("gap error")
     print(gap_error)
+    print("Secquence")
+    print(seqq)
 
 
 # 追捕
@@ -37,22 +41,23 @@ def hunt(p_locs, e_loc, p):
     global hunt_end
     global in_list
     global gap_error
-    vel_xy, hunt_end, in_list, gap_error = env1.run()
-    output_screen(vel_xy)
-    return vel_xy
+    global seq
+    vel_xy, hunt_end, in_list, gap_error, seq = env1.run()
+    output_screen(vel_xy, seq)
+    return vel_xy, seq
 
 
 # 围猎
 st8 = ST8()
-def treibjagd(pos_arr, txy):
-    vel_xy = st8.op_vol(pos_arr, txy)
+def treibjagd(pos_arr, txy, seq):
+    vel_xy = st8.op_vol(pos_arr, txy, seq)
     # output_screen(vel_xy)
     return vel_xy
 
 
 # 位置订阅回调
 def pos_sub_cb(pos, vel_pub):
-    uavNumbers = 8
+    uavNumbers = 48
     p_locs = []  # -------------------------- 无人机位置
     pos_arr = np.zeros((3, uavNumbers), dtype='f8')  # 无人机位置
 
@@ -67,12 +72,21 @@ def pos_sub_cb(pos, vel_pub):
     vel_xy = np.zeros((3, uavNumbers), dtype='f8')  # 速度控制
     v_xy = np.zeros((2, uavNumbers), dtype='f8')
     # e_loc = [35.11905, 54.52596]  # 目标点位置
-    e_loc = [0.5, 42.5]  # 目标点位置
+    # e_loc = [0.5, 42.5]  # 目标点位置圆心
+    e_loc = [0.65, 56.9]
     #e_loc = [43.5, -21.5]  # 目标点位置
     if not hunt_end:
-        v_xy = hunt(p_locs, e_loc, in_list)
+        global g_seq
+        v_xy, seq = hunt(p_locs, e_loc, in_list)
+        g_seq = seq
+        g_seq = seq
+        print g_seq
+
+        id = ""
+        id.
     else:
-        vel_xy = treibjagd(pos_arr, e_loc)
+        global g_seq
+        vel_xy = treibjagd(pos_arr, e_loc, g_seq)
         #print("round up!")
 
     # =============================  发布  =============================
@@ -82,12 +96,13 @@ def pos_sub_cb(pos, vel_pub):
             vel_arr.x.append(v_xy[0][i])
             vel_arr.y.append(v_xy[1][i])
             vel_arr.z.append(0)
-        else:
-            vel_arr.x.append(vel_xy[0][i])
-            vel_arr.y.append(vel_xy[1][i])
-            vel_arr.z.append(vel_xy[2][i])
+        # else:
+            # vel_arr.x.append(vel_xy[0][i])
+            # vel_arr.y.append(vel_xy[1][i])
+            # vel_arr.z.append(vel_xy[2][i])
 
-    vel_pub.publish(vel_arr)
+
+
 
 
 if __name__ == '__main__':

@@ -1,0 +1,1 @@
+ground_control_station/VisualStatus[] StatusArray

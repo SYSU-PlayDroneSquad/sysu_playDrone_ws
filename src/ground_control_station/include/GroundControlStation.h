@@ -25,7 +25,6 @@ private:
     ros::NodeHandle _nh;
     int _uavNumbers;
 
-    UavStatusUpdate _uavStatusUpdate;
     ground_control_station::Array3 _pos_arr;
     vector<UavMarker> _uav_marker_array;
 
@@ -41,6 +40,9 @@ private:
 
     // 高度修正值
     static vector<double> _height_corrected;
+
+public:
+    UavStatusUpdate _uavStatusUpdate;
 
 public:
     GroundControlStation(const ros::NodeHandle& nh, const int& uavNumbers,
@@ -59,22 +61,26 @@ public:
             UavMarker marker(_nh, "uav" + std::to_string(i));
             _uav_marker_array.emplace_back(marker);
         }
-        // 设置本地坐标系原点
+        // 设置原点
         gps2enu.Reset(latitude, longitude, altitude);
         // ros
         _pos_pub = _nh.advertise<ground_control_station::Array3>("/position_list", 10);
-        _status_sub = _nh.subscribe("/abc", 10, &GroundControlStation::status_sub_cb, this);
+        _status_sub = _nh.subscribe("/UAVs/status", 10, &GroundControlStation::status_sub_cb, this);
         _key_sub = _nh.subscribe("key", 10, &GroundControlStation::key_sub_cb, this);
         // 位置
         _pos_x = _pos_y = _pos_z = 0;
         _pos_arr.x.resize(_uavNumbers); _pos_arr.y.resize(_uavNumbers); _pos_arr.z.resize(_uavNumbers);
     }
 
-   ~GroundControlStation() = default;
-
+    ~GroundControlStation() = default;
+    GroundControlStation() = default;
     // 无人机状态回调
     void status_sub_cb(const ground_control_station::StatusArrayNew& status){
         location_release(status); // 位置发布
+//        for(int i(0); i < 12 ; i++){
+//          cout << "status.StatusArray[" << i << "]: " << endl;
+//          cout << status.StatusArray[i] << endl;
+//        }
     }
 
     // 键盘控制回调
@@ -95,12 +101,14 @@ public:
                 gps2enu.Forward(_latitude, _longitude, _altitude, _pos_x, _pos_y, _pos_z);     // 计算本地坐标
                 height_correcte(i);                                                                     // 高度修正
                 _uavStatusUpdate.data_handing(status.StatusArray[i].id, status.StatusArray[i].lv_gps,
-                             status.StatusArray[i].flight_status, _pos_z);                           // 状态显示
+                             status.StatusArray[i].flight_status, _pos_z);                              // 状态显示
                 _uav_marker_array[i].handing(_pos_x, _pos_y, _pos_z, status.StatusArray[i].quaternion); // 可视化
                 _uav_marker_array[i]._motor_enable = status.StatusArray[i].flight_status;
                 _pos_arr.x[i] = _pos_x; _pos_arr.y[i] = _pos_y; _pos_arr.z[i] = _pos_z;
             } else {
-                // cout << "uav" << status.StatusArray[j].id << "does not receive location message" << endl;
+                if(status.StatusArray[i].id != 0){
+                  ROS_ERROR("status.StatusArray[%d].id = %d", i, status.StatusArray[i].id);
+                }
                 height_correcte(i);
                 _pos_arr.x[i] = 0; _pos_arr.y[i] = 0; _pos_arr.z[i] = 0;
             }
@@ -119,6 +127,5 @@ public:
       }
     }
 };
-vector<double> GroundControlStation::_height_corrected;
 
 #endif //SRC_GROUND_CONTROL_STATION_H

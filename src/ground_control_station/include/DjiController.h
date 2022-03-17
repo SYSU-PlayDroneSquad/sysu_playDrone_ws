@@ -17,6 +17,7 @@
 #include <dji_sdk/SetLocalPosRef.h>      // GPS相关
 #include <dji_sdk/QueryDroneVersion.h>   // 飞控版本获取
 #include <dji_sdk/SDKControlAuthority.h> // 获取板载控制权
+#include <dji_sdk/MFIOConfig.h>          // PWM
 
 // Others includes
 #include <cmath>
@@ -52,6 +53,7 @@ public:
         // 解锁电机
         _motor_control_client = nh.serviceClient<dji_sdk::DroneArmControl>(
                 _uavName + "/dji_sdk/drone_arm_control");
+        _attack_client = nh.serviceClient<dji_sdk::MFIOConfig>(_uavName + "/dji_sdk/mfio_config");
 
         // 速度订阅与发布
 
@@ -257,6 +259,19 @@ public:
         _setVelYaw_pub.publish(_setVelYaw_msg);
         cout << _uavName << ": Successfully sent the right turn command!" << endl;
     }
+
+    void attack(){
+        dji_sdk::MFIOConfig attack_srv;
+        attack_srv.request.channel = 0;
+        attack_srv.request.mode = 0;
+        attack_srv.request.init_on_time_us = 500;
+        attack_srv.request.pwm_freq = 50;
+        _attack_client.call(attack_srv);
+        cout << _uavName << ": attack success!" << endl;
+
+    }
+
+
     // 机身(FLU)&大地(ENU)坐标系切换
     bool _frame{};
     void switch_frame(){
@@ -277,7 +292,10 @@ public:
         }
     }
 
+
     void go_home(){}
+
+
 
     /*
     void set_pos(sensor_msgs::Joy pos){///待完善-不可用
@@ -410,10 +428,10 @@ public:
     void vel_list_sub_CB(const ground_control_station::Array3::ConstPtr &vel_list, string uavName, ros::Publisher &pub) {
         if(_round_up){
             cout << "round up" << endl;
-            int id = uavName[3] - '0' - 1;
-            _xCmd = vel_list->x[id];
-            _yCmd = vel_list->y[id];
-            _zCmd = vel_list->z[id];
+            int id = std::stoi(uavName.substr(uavName.find('v') + 1));
+            _xCmd = vel_list->x[id - 1];
+            _yCmd = vel_list->y[id - 1];
+            _zCmd = vel_list->z[id - 1];
             get_vel();
             pub.publish(_setVelYaw_msg);
         }
@@ -520,6 +538,7 @@ private:
     ros::ServiceClient _drone_task_client;
     // 解锁电机
     ros::ServiceClient _motor_control_client;
+    ros::ServiceClient _attack_client;
     // 速度
     static sensor_msgs::Joy _setVelYaw_msg;
     ros::Publisher _setVelYaw_pub;

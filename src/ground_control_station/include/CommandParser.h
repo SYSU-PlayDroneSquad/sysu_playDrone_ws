@@ -41,7 +41,11 @@ public:
                 // 是本机的话直接执行指令
                 baseControl(data);
             }
-        } else { // 不是单机的话直接执行指令
+        } else if(check == "att"){
+            attack(data);
+        }
+
+        else { // 不是单机的话直接执行指令
             baseControl(data);
         }
     }
@@ -50,6 +54,17 @@ public:
         _uav.pub_status();
     }
    */
+
+   void attack(std::string data){
+     for(int i(0); i < 4; i++){
+       data = data.substr(data.find('#') + 1);
+       int id = std::stoi(data.substr(0,data.find('#')));
+       int uavID = std::stoi(_uavName.substr(3, 3));
+       if(id == uavID){
+         _uav.attack();
+       }
+     }
+   }
 
     void baseControl(const string& data) {
         if (data == "MotorUnlock") {

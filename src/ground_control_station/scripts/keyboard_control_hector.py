@@ -42,7 +42,23 @@ msg = """
 CTRL-C to quit
 
 """
+single_mode = False
+cmd = 'illegal'
+uavName = 'uav1'
 
+def switch_single_mode(single_mode):
+    if single_mode:
+        print('\n============ Enter a single mode ============')
+        print('\nPlease input number of quadrotors(eg. 1#) :')
+        cut_mode = False
+        timeout = 1000
+        uavNumber = get_key(cut_mode, timeout)
+        # 字符串切片，截取uavNumber开头到字符'#'的字符（去除回车符号）
+        uavName = 'uav' + uavNumber[:uavNumber.find('#') + 1]
+        print('\n=============================================\n')
+        return uavName
+    else:
+        print('\n============ Enter group mode ============\n')
 
 def get_key(cut_mode, timeout):
     if cut_mode:
@@ -67,6 +83,9 @@ def get_key(cut_mode, timeout):
 
 
 def tasks_publish(pub, key):
+    global single_mode
+    global cmd
+    global uavName
     if key == '0':
         cmd = 'MotorUnlock'
     elif key == '1':
@@ -74,9 +93,12 @@ def tasks_publish(pub, key):
     elif key == '2':
         cmd = 'Land'
     elif key == '3':
-        cmd = 'SwarmControl'
+        single_mode = bool(1 - single_mode)
+        uavName = switch_single_mode(single_mode)
     elif key == '4':
         cmd = 'GoHome'
+    elif key == '5':
+        cmd = 'Wave'
     elif key == 'w':
         cmd = 'Forward'
     elif key == 's':
@@ -104,18 +126,16 @@ def tasks_publish(pub, key):
     else:
         cmd = 'illegal'
     if cmd != 'illegal':
-        if cmd != 'SwarmControl':
+        if single_mode:
             msg = String()
+            cmd = uavName + cmd
             msg.data = cmd
             pub.publish(msg)
             print('Send command ' + cmd + ' successfully.')
         else:
-            print('\nPlease input num of quadrotors:')
-            cut_mode = False
-            timeout = 1000
-            num = int(get_key(cut_mode, timeout))
-            rospy.set_param('/uavNumbers', num)
-            pub.publish(cmd)
+            msg = String()
+            msg.data = cmd
+            pub.publish(msg)
             print('Send command ' + cmd + ' successfully.')
 
 

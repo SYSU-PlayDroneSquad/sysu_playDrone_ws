@@ -1,3 +1,4 @@
+/*
 // ros include
 #include <ros/ros.h>
 #include <message_filters/subscriber.h>
@@ -206,3 +207,79 @@ int main(int argc, char** argv) {
     ros::spin();
     return 0;
 }
+*/
+// ros include
+#include <ros/ros.h>
+#include <message_filters/synchronizer.h>
+#include <visualization_msgs/Marker.h>
+
+#include <boost/thread/thread.hpp>
+
+#include "ground_control_station/Array3.h"
+
+using namespace message_filters;
+using namespace std;
+
+ground_control_station::Array3 pos_arr;
+
+class PosSubscriber{
+private:
+    string _uavName;
+    ros::NodeHandle _nh;
+    ros::Subscriber _pos_sub;
+    int _id;
+
+public:
+    PosSubscriber(const ros::NodeHandle& nh, int id){
+        _id = id;
+        _uavName = "uav" + std::to_string(id);
+        _nh = nh;
+        _pos_sub = _nh.subscribe<visualization_msgs::Marker>(
+                _uavName + "/command/pose_marker", 1, boost::bind(&PosSubscriber::pos_sub_CB, this, _1, _id));
+        cout << _uavName << endl;
+    }
+    PosSubscriber() = default;
+    ~PosSubscriber() = default;
+
+public:
+    void pos_sub_CB(const visualization_msgs::MarkerConstPtr &pos, int id){
+        pos_arr.x[id-1] = pos->pose.position.x;
+        pos_arr.y[id-1] = pos->pose.position.y;
+        pos_arr.z[id-1] = pos->pose.position.z;
+    }
+};
+
+void pub_pos_arr_CB(const ros::TimerEvent &Event, ros::Publisher &pub_pos_arr){
+    pub_pos_arr.publish(pos_arr);
+    cout << pos_arr << endl << endl;
+
+}
+
+int main(int argc, char** argv) {
+    ros::init(argc, argv, "position_fusion");
+    ros::NodeHandle nh;
+
+    // 初始化 pos_arr
+    int uavNum = 24;
+    pos_arr.x.resize(uavNum);
+    pos_arr.y.resize(uavNum);
+    pos_arr.z.resize(uavNum);
+
+    // 订阅器组
+//    PosSubscriber pos_sub(nh, 7);
+    vector<PosSubscriber> sub_arr;
+    for(int i(1); i < uavNum + 1; i++){
+        PosSubscriber pos_sub(nh, i);
+        sub_arr.emplace_back(pos_sub);
+    }
+
+    // 位置发布器 定时器发布
+    ros::Publisher pub_pos_arr = nh.advertise<ground_control_station::Array3>("pos_arr", 100);
+//    ros::MultiThreadedSpinner spinner(8);
+    ros::Timer pub_timer = nh.createTimer(ros::Duration(0.02), boost::bind(pub_pos_arr_CB, _1, pub_pos_arr));
+    cout << "start" << endl;
+    ros::spin();
+    return 0;
+}
+
+

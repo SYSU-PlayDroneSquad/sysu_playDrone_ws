@@ -39,6 +39,9 @@ public:
         _uav_state.request.model_name = _uavName;
 
         _height = 4;
+        if(_uavName == "uav25"){
+            _height = 2;
+        }
         _vel_limt = 1;
         _setp = 0.05;
 
@@ -75,6 +78,9 @@ public:
         _home_position_msg.pose.position.x = _uav_state.response.pose.position.x;
         _home_position_msg.pose.position.y = _uav_state.response.pose.position.y;
         _home_position_msg.pose.position.z = _height;
+        if(_uavName == "uav25"){
+            _home_position_msg.pose.position.z = 2;
+        }
 
         // 起飞
         if (_uav_state.response.pose.position.z < 0.3) {
@@ -199,6 +205,31 @@ public:
         _twist_pub.publish(_twist_msg);
         cout << _uavName << " send rotate_right success!" << endl;
     }
+
+    void wave(){
+        ros::Time begin = ros::Time::now();
+        ros::Rate r(10);
+        double v_x = 1;
+        double v_y = 1;
+        while(ros::ok()){
+            ros::Time now = ros::Time::now();
+            ros::Duration delta_t = now - begin;
+            double t = delta_t.toSec();
+            _twist_msg.linear.x = v_x * cos(t * M_PI/6);
+            _twist_msg.linear.y = abs(v_y * sin(t * M_PI/6));
+            _twist_pub.publish(_twist_msg);
+            if(t > 18){
+                _twist_msg.linear.x = 0;
+                _twist_msg.linear.y = 0;
+                 _twist_pub.publish(_twist_msg);
+                return;
+            }
+            r.sleep();
+        }
+        cout << "uav start run with wave path" << endl;
+
+
+     }
 
     void set_pos(sensor_msgs::Joy pos){
         _position_msg.pose.position.x = pos.axes[0];

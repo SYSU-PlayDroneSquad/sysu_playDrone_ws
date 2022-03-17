@@ -13,8 +13,8 @@ class Agent(object):
         self.id = id
         self.loc = loc
         self.group = group
-        self.vmax = 0.7
-        self.vmax2 = 0.8# pursuer 速度
+        self.vmax = 1
+        self.vmax2 = 2# pursuer 速度
         self.a_range = a_range
         self._in_range = 0
         self.state = state
@@ -23,7 +23,7 @@ class Agent(object):
         self.gap = 0
         self.dis = 0
         self.v = np.array([0, self.vmax * self.time_step])
-        self.too_close = []
+        self.too_close = False
         self.repel_v = [0, 0]
         self.left = []
         self.right = []
@@ -54,7 +54,7 @@ class Agent(object):
                     self.state = 1
             else:
                 if self.state == 0:
-	                if self.a_range + 1.5 <= self.dis <= self.a_range + 2.5:
+	                if self.a_range + 1.5 <= self.dis <= self.a_range + 6.5:
                          self.state = 2
 
 
@@ -65,12 +65,17 @@ class Agent(object):
         for a in agents:
             if a.id != self.id:
                 dis = np.linalg.norm(self.loc - a.loc)
-                if dis <= 1.5:
-                    self.too_close.append(a)
+                if dis <= 2:
+                    self.too_close = True
 
     def get_v(self, e_loc, e_v):
-        if self.state == 0 or self.state == 2:
+        if self.state == 0:
             self.v = [0, self.vmax]
+        if self.state == 2:
+            if self.too_close:
+                self.v = [0, self.vmax * 0.5]
+            else:
+                self.v = [0, self.vmax]
         if self.state == 1:
             change = self.vmax / self.dis
             if change > np.abs(self.gap):
@@ -83,7 +88,7 @@ class Agent(object):
                 else:
                     angle1 = self._relative_angle - change
                 new_loc = e_loc + self.dis * np.array([np.cos(angle1), np.sin(angle1)])
-                self.v = (new_loc - self.loc) * 1.2
+                self.v = (new_loc - self.loc) * 1.5
 
     def move(self):
         #self.loc = self.loc + self.v
@@ -149,63 +154,7 @@ class Agents(object):
         self.inrange1 = []
         self.inrange2 = []
         self.inrange3 = []
-
-    def init(self):
-        i = 0
-        start = [18.5, 42]
-
-        start2 = [15.5, 42]
-        start3 = [15.5, 24]
-
-        start4 = [9.5, 42]
-
-        for j in range(4):
-            loc1 = np.array([start[0], start[1] - j * 4.5])
-            loc2 = np.array([start[0] + 3, start[1] - j * 4.5])
-            a1 = Agent(i, loc1, 1, 8)
-            a2 = Agent(i + 1, loc2, 1, 8)
-            self.agents.append(a1)
-            self.agents.append(a2)
-            i = i + 2
-
-        for k in range(4):
-            loc1 = np.array([start2[0], start2[1] - k * 4.5])
-            loc2 = np.array([start2[0] + 9, start2[1] - k * 4.5])
-            a1 = Agent(i, loc1, 2, 16)
-            a2 = Agent(i + 1, loc2, 2, 16)
-            self.agents.append(a1)
-            self.agents.append(a2)
-            i = i + 2
-
-        for l in range(2):
-            loc1 = np.array([start3[0], start3[1] - l * 4.5])
-            loc2 = np.array([start3[0] + 3, start3[1] - l * 4.5])
-            loc3 = np.array([start3[0] + 6, start3[1] - l * 4.5])
-            loc4 = np.array([start3[0] + 9, start3[1] - l * 4.5])
-            a1 = Agent(i, loc1, 2, 16)
-            a2 = Agent(i + 1, loc2, 2, 16)
-            a3 = Agent(i + 2, loc3, 2, 16)
-            a4 = Agent(i + 3, loc4, 2, 16)
-            self.agents.append(a1)
-            self.agents.append(a2)
-            self.agents.append(a3)
-            self.agents.append(a4)
-            i = i + 4
-
-        for m in range(6):
-            loc1 = np.array([start4[0], start4[1] - m * 4.5])
-            loc2 = np.array([start4[0] + 3, start4[1] - m * 4.5])
-            loc3 = np.array([start4[0] + 18, start4[1] - m * 4.5])
-            loc4 = np.array([start4[0] + 21, start4[1] - m * 4.5])
-            a1 = Agent(i, loc1, 3, 24)
-            a2 = Agent(i + 1, loc2, 3, 24)
-            a3 = Agent(i + 2, loc3, 3, 24)
-            a4 = Agent(i + 3, loc4, 3, 24)
-            self.agents.append(a1)
-            self.agents.append(a2)
-            self.agents.append(a3)
-            self.agents.append(a4)
-            i = i + 4
+        self.sequence = []
 
     def whether_in_range(self, e_loc):
         inlist1 = []
@@ -233,16 +182,57 @@ class Agents(object):
         if len(self.inrange3) != 0:
             self.inrange3.sort(key=lambda agent: agent[1])
 
-    def whether_complete(self):
-        gaps = []
-        for a in self.agents:
-            gaps.append(a.gap)
+        sqc = []
+        for a in self.inrange1:
+            sqc.append(np.int(a[0]))
+        for a in self.inrange2:
+            sqc.append(np.int(a[0]))
+        for a in self.inrange3:
+            sqc.append(np.int(a[0]))
 
-        gap_error = np.linalg.norm(gaps)
-        if 0.1 <= gap_error <= 0.2 and len(self.inrange1) == 8:
-            return True, gap_error
+        self.sequence = sqc
+
+    def whether_complete(self):
+        gaps1 = []
+        gaps2 = []
+        gaps3 = []
+
+        for a in self.agents:
+            if a.group == 1:
+                gaps1.append(a.gap)
+            if a.group == 2:
+                gaps2.append(a.gap)
+            if a.group == 3:
+                gaps3.append(a.gap)
+
+        gap_error1 = np.linalg.norm(gaps1)
+        gap_error2 = np.linalg.norm(gaps2)
+        gap_error3 = np.linalg.norm(gaps3)
+
+        if gap_error1 <= 0.40 and len(self.inrange1) == 8:
+            group1 = True
         else:
-            return False, gap_error
+            group1 = False
+
+        if gap_error2 <= 0.20 and len(self.inrange2) == 12:
+            group2 = True
+        else:
+            group2 = False
+
+        if gap_error2 <= 0.20 and len(self.inrange3) == 16:
+            group3 = True
+        else:
+            group3 = False
+        
+
+        errors = np.array([gap_error1, len(self.inrange1), group1, gap_error2, len(self.inrange2), group2, gap_error3, len(self.inrange3), group3])
+
+   
+        if group1 and group2 and group3:
+            return True, errors, self.sequence
+        else:
+            return False, errors, self.sequence
+
 
     def _in_range_count(self):
         count = 0
@@ -275,11 +265,32 @@ class Agents(object):
                 gap = rights[j] - lefts[j]
                 self.agents[int(inrange[j][0])].gap = gap
 
-        if length == 1:
-            if self.agents[int(inrange[0][0])].id < 4.5 :
-                self.agents[int(inrange[0][0])].gap = -np.pi
-            else:
-                self.agents[int(inrange[0][0])].gap = np.pi
+        key = self.agents[int(inrange)[0][0]].group
+
+        if key == 1:
+            if length == 1:
+                if self.agents[int(inrange[0][0])].id < 4.5:
+                    self.agents[int(inrange[0][0])].gap = -np.pi
+                else:
+                    self.agents[int(inrange[0][0])].gap = np.pi
+            if length > 1 and length < 8:
+                if self.agents[int(inrange[0][0])].id < 4.5:
+                    self.agents[int(inrange[0][0])].gap = -np.abs(self.agents[int(inrange[0][0])].gap)
+                else:
+                    self.agents[int(inrange[0][0])].gap = np.abs(self.agents[int(inrange[0][0])].gap)
+
+        if key == 2:
+            if length == 1:
+                if self.agents[int(inrange[0][0])].id < 16.5:
+                    self.agents[int(inrange[0][0])].gap = -np.pi
+                else:
+                    self.agents[int(inrange[0][0])].gap = np.pi
+            if length >= 1 and length < 16.5:
+                if self.agents[int(inrange[0][0])].id < 16.5:
+                    self.agents[int(inrange[0][0])].gap = -np.abs(self.agents[int(inrange[0][0])].gap)
+                else:
+                    self.agents[int(inrange[0][0])].gap = np.abs(self.agents[int(inrange[0][0])].gap)
+
 
     def get_all_gap(self):
         if len(self.inrange1) != 0:
