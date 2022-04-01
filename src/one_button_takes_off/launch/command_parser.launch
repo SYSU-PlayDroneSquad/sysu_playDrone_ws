@@ -1,0 +1,9 @@
+<launch>
+    <arg name="uavName" default="uav1"/>
+    <node name="command_parser"
+          pkg="ground_control_station"
+          type="command_parser"
+          output="screen">
+        <param name="uavName" type="string" value="$(arg uavName)" />
+    </node>
+</launch>

@@ -1,5 +1,6 @@
 # coding: utf-8
 
+# from fiftyPSO_48AR import PSO
 import numpy as np
 import math
 
@@ -14,23 +15,23 @@ import math
 class ST8(object):
     def __init__(self):
 
-        self.dt = 0.3
-        self.ve = 0
-        self.vp = 0
+        self.dt = 0.3  # 时步/秒
+        self.ve = 0  # 目标速度(可预设/也可传入)
+        self.vp = 0  # 无人机速度
 
-        self.r0 = 3  # ---------------------------------------------------------[攻击圈半径_需实际修改]
-        self.r1 = 10  # --------------------------------------------------------[内圈半径_需实际修改]
-        self.r2 = 20  # --------------------------------------------------------[中圈半径_需实际修改]
-        self.r3 = 24  # --------------------------------------------------------[外圈半径_需实际修改]
+        self.r0 = 3  # ---------------------------------------------------------[目标圈半径_需实际修改]
+        self.r1 = 10  # ---------------------------------------------------------[初始圈半径_需实际修改]
+        self.r2 = 20  # --------------------------------------------------------[中间圈半径_需实际修改]
+        self.r3 = 24  # --------------------------------------------------------[外部圈半径_需实际修改]
 
-        self.n = 48
-        self.sn = 4
-        self.a = 0.15
+        self.n = 48  # 无人机数目
+        self.sn = 4  # 单组架次
+        self.a = 0.15  # 采用的固定加速度_收缩阶段
         self.amx = 0.15
-        self.a_bri = 0.15
-        self.v_up = 1
-        self.v_bre = 1
-        self.v_ret = 3
+        self.a_bri = 0.15  # 撤退上升加速度
+        self.v_up = 1  # -----------------------------------------------------[上升匀速限制可调]
+        self.v_bre = 1  # ----------------------------------------------------[收缩匀速限制可调]
+        self.v_ret = 2  # ----------------------------------------------------[撤退匀速限制可调]
 
         self.oex, self.oey = 0, 0
         self.ver_ex, self.ver_ey = 0, 0
@@ -52,13 +53,13 @@ class ST8(object):
         self.p_xy = np.zeros((3, self.n))
 
         self.tN = 18
-        self.der = 0.3
+        self.der = 0.3  # -------------------------------------------------------[误差限可调]
         self.ter, self.cou = np.zeros(self.tN), np.zeros(self.tN)
         self.jud = self.r1 * np.ones(self.tN)
         self.d_sym, self.d_jud = np.zeros(self.n), np.zeros(self.tN)
 
         self.rn = 12
-        self.zt = 6
+        self.zt = 6  # -----------------------------------------------------[上升目标高度可调]
         self.z = 5
         self.rou = np.zeros(self.rn)
         self.pz = self.z * np.ones(self.n)
@@ -77,11 +78,11 @@ class ST8(object):
         self.dis_re, self.dis_rt, self.dis_te = self.n * np.ones(self.rn), np.zeros(self.rn), np.zeros(self.rn)
 
         self.tar_x, self.tar_y = [], []
-        rx0, ry0 = 0, -30  # --------------------------------------------[撤离基点坐标_需实际修改]
-        r_row, r_col = 2, 3
+        rx0, ry0 = 0, -30  # ---------------------------------------------[撤离点坐标_需实际修改]
+        r_row, r_col = 3, 4
         rex, rey = np.zeros((r_row, r_col)), np.zeros((r_row, r_col))
-        d_x, d_y = -10, 10  # ---------------------------------------------[横纵向间距_需实际修改]
-        rx, ry = rx0-(len(rex[0, :])-1)*d_x/2, ry0
+        d_x, d_y = -10, 10
+        rx, ry = rx0-(len(rex[0, :])-1)*d_x/2, ry0  # 撤退目标点矩阵的第一点
         for row in range(r_row):
             rey[row, :] = row * d_y + ry
             for col in range(r_col):
@@ -392,7 +393,6 @@ class ST8(object):
             self.vxy[1, t_ip] = self.vy_t[f_ip]
             self.vxy[2, t_ip] = self.pvz[f_ip]
 
-        print(self.jud[0:24])
         return self.vxy, land_str, attack_str
 
     def attack(self, k):
@@ -441,8 +441,7 @@ class ST8(object):
             self.ver_xx[bm] = (self.tar_x[bm] - sxx) / self.dis_te[bm]
             self.ver_yy[bm] = (self.tar_y[bm] - syy) / self.dis_te[bm]
 
-            # print(self.oyy[bm] - self.tar_y[bm])
-            if self.oyy[bm] - self.tar_y[bm] <= self.der:
+            if abs(self.oxx[bm] - self.tar_x[bm]) <= self.der or abs(self.oyy[bm] - self.tar_y[bm]) <= self.der:
                 if self.vp_x[k] == 0 and self.vp_y[k] == 0:
                     ST8.land(self, k)
                     self.juz_sym[bm] = 0
@@ -453,8 +452,9 @@ class ST8(object):
                 self.vp_y[k] = self.v_ret * self.ver_yy[bm]
 
             if self.ct[bm] % self.sn == 0:
-                self.oxx[bm] = self.ox[bm] / self.rou[bm]
-                self.oyy[bm] = self.oy[bm] / self.rou[bm]
+                if self.land_sym == 0:
+                    self.oxx[bm] = self.ox[bm] / self.rou[bm]
+                    self.oyy[bm] = self.oy[bm] / self.rou[bm]
                 self.dis_rt[bm] = np.sqrt((self.sx - self.oxx[bm]) ** 2 + (self.sy - self.oyy[bm]) ** 2)
 
             if self.dis_rt[bm] > self.r0+1:
@@ -485,27 +485,24 @@ class ST8(object):
         v_sum = np.sqrt(vx**2 + vy**2)
 
         vt, ver_xt, ver_yt = ST8.angle(self, lr, k)
-        print(self.vpx_sum[k], self.vpy_sum[k], v_sum)
+
         if self.dis[k] > lr + self.der:
             if v_sum < self.v_bre:
-                # print(3)
                 aa = self.a
             else:
-                # print(4)
                 aa = 0
-        elif self.dis[k] < lr - 3*self.der:
-            # print(5)
-            aa = -0.05
         else:
-            # print(6)
             aa = 0
+            # p_pso = PSO(pn_, dim_, max_iter_, self.amx)
+            # p_pso.p_init(self.r0, self.oex, self.oey, x, y, vx, vy, vex, vey, self.dt)
+            # aa = p_pso.p_iter(self.r0, self.oex, self.oey, x, y, vx, vy, vex, vey, self.dt)
 
         vxx = self.ver_xi[k] * aa
         vyy = self.ver_yi[k] * aa
         self.n_px[k] = self.px[k] + vt * ver_xt * self.dt + self.vp_x[k] * self.dt + 0.5 * vxx * self.dt ** 2
         self.n_py[k] = self.py[k] + vt * ver_yt * self.dt + self.vp_y[k] * self.dt + 0.5 * vyy * self.dt ** 2
-        self.vpx_sum[k] += vxx * self.dt
-        self.vpy_sum[k] += vyy * self.dt
+        self.vpx_sum[k] = self.vpx_sum[k] + vxx * self.dt
+        self.vpy_sum[k] = self.vpy_sum[k] + vyy * self.dt
 
         if (self.dis[k] - lr) > self.der:
             self.vp_x[k] = self.vpx_sum[k] + self.ve * self.ver_ex
@@ -518,6 +515,7 @@ class ST8(object):
         self.vy_t[k] = self.vp_y[k] + vt * ver_yt
 
     def angle(self, lr, k):
+        # 夹角均分机制
         if lr == self.r0:
             index = list([m, xx.index(k)] for m, xx in enumerate(self.g4) if k in xx)
             lin = self.g4[index[0][0]][index[0][1] - 1]
@@ -539,14 +537,8 @@ class ST8(object):
         ver_y_l = (self.oey - self.py[lin]) / dis_l
         ver_x_u = (self.oex - self.px[uin]) / dis_u
         ver_y_u = (self.oey - self.py[uin]) / dis_u
-        c_il = self.ver_xi[k]*ver_x_l+self.ver_yi[k]*ver_y_l
-        c_iu = self.ver_xi[k]*ver_x_u+self.ver_yi[k]*ver_y_u
-        if c_il > 1: c_il = 1
-        if c_il < -1: c_il = -1
-        if c_iu > 1: c_iu = 1
-        if c_iu < -1: c_iu = -1
-        theta_i_l = math.acos(c_il)
-        theta_i_u = math.acos(c_iu)
+        theta_i_l = math.acos(self.ver_xi[k]*ver_x_l+self.ver_yi[k]*ver_y_l)
+        theta_i_u = math.acos(self.ver_xi[k]*ver_x_u+self.ver_yi[k]*ver_y_u)
         gap_lu = theta_i_u - theta_i_l
         crs = ver_xt*self.ver_yi[k] - self.ver_xi[k]*ver_yt
         if crs > 0:

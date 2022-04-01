@@ -23,14 +23,8 @@ public:
         _uavNumbers = uavNumbers;
         _full = false;
 
-//        _visual_status_array_msg.StatusArray.resize(_uavNumbers);
-//        for(int i(0); i < _uavNumbers; i++){
-//            _visual_status_array_msg.StatusArray[i].status.resize(4);
-//        }
-//
-//        _visual_status_pub = _nh.advertise<ground_control_station::VisualStatusArray>("/visual_status",10);
-
-        string space = " "; space.resize(8, ' ');
+        // string space = " "; space.resize(8, ' ');
+        string space(8, ' ');
         _lv_5 = "\33[31m▮\33[35m▮\33[33m▮\33[32m▮▮\33[0m" + space;
         _lv_4 = "\33[31m▮\33[35m▮\33[33m▮\33[32m▮\33[0m " + space;
         _lv_3 = "\33[31m▮\33[35m▮\33[33m▮\33[0m  " + space;
@@ -39,7 +33,6 @@ public:
         _lv_0 = "\33[31m✖\33[0m    " + space;
 
         _check_status = _nh.createTimer(ros::Duration(0.1), &UavStatusUpdate::check_status_CB, this);
-
     }
 
     ~UavStatusUpdate()= default;
@@ -47,7 +40,8 @@ public:
     void data_handing(unsigned int id, unsigned int lv_gps, unsigned int flight_status, double &height){
         push_uavName(id);
         push_item(id, lv_gps, height, flight_status);
-        // output();
+        //output();
+        //cout << "what fuck1" << endl;
     }
 
     // 把 uavName push 进 _status
@@ -64,7 +58,6 @@ public:
             if(empty && !storage(uavName, empty)){
                 _status[_uavNumbers - empty][0] = uavName;
                 --empty;
-                // cout << "empty2 = " << empty << endl;
                 if(empty == 0){
                     _full = true;
                 }
@@ -72,7 +65,6 @@ public:
             }
         }
     }
-
 
     // 检查该 uavName 是否存储
     bool storage(const string& uavName, int empty) const{
@@ -108,7 +100,6 @@ public:
             }
         }
     }
-
 
     // 把无人机的状态条目 push 到 _status
     void push_item(unsigned int &id, unsigned int &lv_gps, double &height, unsigned int flight_status) const{
@@ -160,7 +151,9 @@ public:
 
     // 输出到屏幕
     void output() const{
-        system("clear");
+        // system("clear");
+        cout << "\033[2J\033[0m" << endl;
+        cout << "\033[0;0H\033[0m";
         string header =  "编号        GPS         高度(m)      电机    ";
         string line   =  "——————————————————————————————————————————————";
         string flash  =  "\33[37m☁\33[0m";
@@ -184,14 +177,6 @@ public:
         }
     }
 
-//    void pub_status(){
-//        for(int i(0); i < _uavNumbers; i++){
-//            for(int j(0); j < 4; j++){
-//                _visual_status_array_msg.StatusArray[i].status[j] = _status[i][j];
-//            }
-//        }
-//        _visual_status_pub.publish(_visual_status_array_msg);
-//    }
 
     // 检查链接通断
     void check_status_CB(const ros::TimerEvent &event) {
@@ -203,14 +188,17 @@ public:
                     _status[i][4] = " ";
                 }
                 _status[i][1] = "0";
-                output();
-//                pub_status();
             }
+        }
+        if(_output_screen){
+            output();
         }
     }
 
+
 public:
     static vector<vector<string>> _status;
+    static bool _output_screen;
 
 private:
     ros::NodeHandle _nh;
@@ -219,9 +207,9 @@ private:
     static int _flash;
     string _lv_0; string _lv_1; string _lv_2;
     string _lv_3; string _lv_4; string _lv_5;
-//    ground_control_station::VisualStatusArray _visual_status_array_msg;
     ros::Publisher _visual_status_pub;
     ros::Timer _check_status;
+
 };
 
 #endif //SRC_UAVSTATUSUPDATE_H

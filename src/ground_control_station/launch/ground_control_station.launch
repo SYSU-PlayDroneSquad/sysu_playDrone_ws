@@ -1,11 +1,12 @@
 <launch>
     <arg name="uavNumbers" default="8" />
-
+    <arg name="uavIds" default="48" />
     <node name="ground_control_station"
           pkg="ground_control_station"
           type="ground_control_station"
           output="screen">
         <param name="uavNumbers"  value="$(arg uavNumbers)" />
+        <param name="uavIds"  value="$(arg uavIds)" />
     </node>
 
     <include file="$(find ground_control_station)/launch/uav_visualization.launch"/>

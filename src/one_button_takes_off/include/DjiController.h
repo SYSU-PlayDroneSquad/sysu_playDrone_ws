@@ -22,8 +22,6 @@
 // Others includes
 #include <cmath>
 #include <utility>
-#include "ground_control_station/Array3.h"
-
 using std::string;
 using std::cout;
 using std::endl;
@@ -59,41 +57,11 @@ public:
 
         _setVelYaw_pub = nh.advertise<sensor_msgs::Joy>(
                 _uavName + "/dji_sdk/flight_control_setpoint_ENUvelocity_yawrate", 10);
-        _vel_list_sub = nh.subscribe<ground_control_station::Array3>(
-                "/vel_list", 100,
-                boost::bind(&DjiN3Controller::vel_list_sub_CB, this, _1, _uavName, _setVelYaw_pub));
 
         // FLU 到 ENU 的旋转四元数订阅
         _dji_att_sub = _nh.subscribe<geometry_msgs::QuaternionStamped>(
                 _uavName +"/dji_sdk/attitude", 10,
                 boost::bind(&DjiN3Controller::attitude_CB, this, _1));
-
-        /*
-        // 飞行状态与模式
-        _flight_status = 255;
-        _display_mode = 255;
-
-         // 位置消息
-        _setPosYaw_msg.axes.emplace_back(_xCmd);
-        _setPosYaw_msg.axes.emplace_back(_yCmd);
-        _setPosYaw_msg.axes.emplace_back(_zCmd);
-        _setPosYaw_msg.axes.emplace_back(_yawCmd);
-
-        // 位置 publisher
-        _setPosYaw_pub = nh.advertise<sensor_msgs::Joy>(
-                _uavName + "/dji_sdk/flight_control_setpoint_ENUposition_yaw", 10);
-        // 状态
-        _status_pub = _nh.advertise<std_msgs::String>(_uavName + "/status", 10);
-
-        // gps health
-        _gps_health_sub = _nh.subscribe(_uavName + "/dji_sdk/gps_health", 10, &DjiN3Controller::gps_health_CB, this);
-
-        // 飞行状态与模式订阅器
-        _flightStatusSub = nh.subscribe(
-                _uavName + "/dji_sdk/flight_status", 10, &DjiN3Controller::flight_status_CB, this);
-        _displayModeSub = nh.subscribe(
-                _uavName + "/dji_sdk/display_mode", 10, &DjiN3Controller::display_mode_CB, this);
-        */
     }
 
     ~DjiN3Controller() = default;
@@ -293,63 +261,8 @@ public:
     }
 
 
-
     void go_home(){}
 
-
-
-    /*
-    void set_pos(sensor_msgs::Joy pos){///待完善-不可用
-        _xCmd = pos.axes[0];
-        _yCmd = pos.axes[1];
-        _zCmd = pos.axes[2];
-        _yawCmd = pos.axes[3];
-        pos_enu2flu(_setPosYaw_msg);
-        cout << "\033[33m_setPosYaw_msg:\033[0m\n" << _setPosYaw_msg << endl;
-        _setPosYaw_pub.publish(_setPosYaw_msg);
-    }
-
-    void set_vel(sensor_msgs::Joy vel){///待完善-不可用
-        _xCmd = vel.axes[0];
-        _yCmd = vel.axes[1];
-        _zCmd = vel.axes[2];
-        _yawCmd = vel.axes[3];
-        if(_frame){
-            vel_enu2flu();
-        } else {
-            _setVelYaw_msg.axes[0] = _xCmd;
-            _setVelYaw_msg.axes[1] = _yCmd;
-        }
-        _setVelYaw_pub.publish(vel);
-    }
-
-     // 设置本地坐标
-    void set_local_position() {
-        ros::ServiceClient set_local_pos_reference;
-        set_local_pos_reference = _nh.serviceClient<dji_sdk::SetLocalPosRef>(
-                _uavName + "/dji_sdk/set_local_pos_ref");
-        dji_sdk::SetLocalPosRef localPosReferenceSetter;
-        set_local_pos_reference.call(localPosReferenceSetter);
-        ros::Rate r(10);
-        int count = 0;
-        while(ros::ok() && count < 10){
-            if (!localPosReferenceSetter.response.result) {
-                cout << "\033[31mError: \033[0m"<< _uavName <<
-                     " GPS health insufficient,failed to set the local reference frame, set again." << endl;
-            } else {
-                cout << "GPS health,local reference frame set succeed!" << endl;
-                _local_frame = string("1");
-                break;
-            }
-            count++;
-            r.sleep();
-        }
-        if(_local_frame != "1"){
-            cout << "\033[31mError: \033[0m"<< _uavName <<
-                 " GPS health insufficient,failed to set the local reference frame." << endl;
-        }
-    }
-    */
 
     /// ========================== 飞控 ==========================
     // 获取板载控制权
@@ -394,66 +307,14 @@ public:
             cout << "enable motor failed" << endl;
         }
     }
-    /*
-    // 判断遥控器是否连接
-    void spinning_motor() {
-        ros::Time start_time = ros::Time::now();
-        int flight = _flight_status;
-        int display = _display_mode;
-        std::cout << "flight_1 = " << flight << std::endl;
-        std::cout << "display_1 = " << display << std::endl << std::endl;
-
-        while (_flight_status != DJISDK::FlightStatus::STATUS_ON_GROUND &&
-               _display_mode != DJISDK::DisplayMode::MODE_ENGINE_START &&
-               ros::Time::now() - start_time < ros::Duration(5)) {
-            ros::Duration(0.01).sleep();
-            ros::spinOnce();
-        }
-        if (ros::Time::now() - start_time > ros::Duration(5)) {
-            cout << "\033[31mError:\033[0m"<< _uavName << "Takeoff failed. Motors are not spinnning." << endl;
-        } else {
-            start_time = ros::Time::now();
-            ROS_INFO("Motor Spinning ...");
-            ros::spinOnce();
-        }
-    }
-    */
 
 
     /// ========================== 回调 ==========================
-    // ENU 到 FLU 的旋转四元数订阅
+    // FLU 到 ENU 的旋转四元数订阅
     void attitude_CB(const geometry_msgs::QuaternionStamped::ConstPtr &msg) {
         quat2Tf2Rpy(msg);
     }
 
-    void vel_list_sub_CB(const ground_control_station::Array3::ConstPtr &vel_list, string uavName, ros::Publisher &pub) {
-        if(_round_up){
-            cout << "round up" << endl;
-            int id = std::stoi(uavName.substr(uavName.find('v') + 1));
-            _xCmd = vel_list->x[id - 1];
-            _yCmd = vel_list->y[id - 1];
-            _zCmd = vel_list->z[id - 1];
-            get_vel();
-            pub.publish(_setVelYaw_msg);
-        }
-    }
-
-    /*
-    // 飞行状态订阅回调
-    void flight_status_CB(const std_msgs::UInt8::ConstPtr &msg) {
-        _flight_status = msg->data;
-    }
-
-    // 显示模式订阅回调
-    void display_mode_CB(const std_msgs::UInt8::ConstPtr &msg) {
-        _display_mode = msg->data;
-    }
-
-    // gps 信号等级订阅
-    void gps_health_CB(const std_msgs::UInt8::ConstPtr &msg){
-        _gps_health = msg->data;
-    }
-    */
 
     /// ========================== 辅助函数 ==========================
     // 四元数转rpy
@@ -464,7 +325,7 @@ public:
         _yawRate = _yaw * 180 / M_PI;
     }
 
-    // 速度、FLU 平面坐标系转 ENU 平面坐标系
+    // 速度、位置 ENU 平面坐标系转 FLU 平面坐标系
     void vel_enu2flu(){//速度控制转换
         ros::spinOnce();
         double xVel, yVel;
@@ -497,24 +358,6 @@ public:
         cout << "get rate sucess,rate = " << _rate << endl;
     }
 
-    /*!
-      * 状态信息
-      * 例子：uav1#105
-      *      消息头：auv1
-      *      第一位：通信，1 或 0
-      *      第二位：本地原点设置、1 或 0
-      *      第三位：GPS 信号等级 0 ～ 5
-      *
-      */
-    /*
-    void pub_status(){
-        // string communication = "1";
-        std_msgs::String status;
-        // status.data = _uavName +"#" + communication + _local_frame + std::to_string(_gps_health);
-        status.data = _uavName + "#" + std::to_string(_gps_health);
-        _status_pub.publish(status);
-    }
-    */
 
     // 赋值速度消息
     void get_vel(){
@@ -555,27 +398,6 @@ private:
     // 围捕
     static bool _round_up;
 
-
-    /*
-    // 位置
-    sensor_msgs::Joy _setPosYaw_msg;
-    ros::Publisher _setPosYaw_pub;
-
-    // 飞行状态与模式参数
-    uint8_t _flight_status{};
-    uint8_t _display_mode{};
-
-    // 飞行状态与模式订阅器
-    ros::Subscriber _flightStatusSub;
-    ros::Subscriber _displayModeSub;
-
-    // 状态
-    ros::Publisher _status_pub;
-    static string _local_frame;
-    // GPS
-    ros::Subscriber _gps_health_sub;
-    static uint8_t _gps_health;
-    */
 };
 // string DjiN3Controller::_local_frame = string("0");
 // uint8_t DjiN3Controller::_gps_health = 0;

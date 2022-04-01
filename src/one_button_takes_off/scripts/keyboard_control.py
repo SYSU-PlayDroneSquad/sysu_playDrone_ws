@@ -35,10 +35,7 @@ msg = """
  |        3 : Switch single mode         |
  |        4 : Round up                   |
  |        5 : Correcte height            |
- |        6 : input id                   |
- |        7 : Get id list                |
- |        8 : Track                      |
- |        9 : Output status              |
+ |        6 : input id
  |        Tab: Switch frame              |     
  |                                       | 
  =========================================
@@ -129,12 +126,6 @@ def tasks_publish(pub, key):
         zhaji = bool(1 - zhaji)
         zhaji_id = input_zhaji()
         print("id = ", zhaji_id)
-    elif key == '7':
-        cmd = 'GetIdList'
-    elif key == '8':
-        cmd = 'Track'
-    elif key == '9':
-        cmd = 'OutPutStatus'
     elif key == 'w':
         cmd = 'Forward'
     elif key == 's':

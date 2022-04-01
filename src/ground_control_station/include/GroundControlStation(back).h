@@ -5,10 +5,6 @@
 #include <ros/ros.h>
 #include <std_msgs/Int32MultiArray.h>
 
-// other include
-#include<termios.h>
-#include<sys/ioctl.h>
-
 // customer include
 #include "ground_control_station/StatusNew.h"
 #include "ground_control_station/StatusArrayNew.h"
@@ -50,6 +46,7 @@ private:
 
     GeographicLib::LocalCartesian gps2enu;     // 调用 GeographicLib 库，转换 gps 坐标
     bool _set_local_position_ref{};
+
 
     // 高度修正值
     static vector<double> _height_corrected;
@@ -110,23 +107,8 @@ public:
             _height_corrected.resize(1);
             cout << "Height correcte successed!" << endl;
         } else if(cmd.data == string("GetIdList")){
-            UavStatusUpdate::_output_screen = false;
             _get_id_list = !_get_id_list;
-            struct winsize size{};
-            ioctl(STDIN_FILENO,TIOCGWINSZ,&size);
-            string tips(" Get id list");
-            string line(size.ws_col, '=');
-            cout << endl << line << endl << "\033[" << (size.ws_col - tips.size())/2 << "C" << tips << endl << line << endl;
-        } else if(cmd.data == string("OutPutStatus")){
-            UavStatusUpdate::_output_screen = !UavStatusUpdate::_output_screen;
-            if(!UavStatusUpdate::_output_screen){
-                struct winsize size{};
-                ioctl(STDIN_FILENO,TIOCGWINSZ,&size);
-                string tips(" End output status ");
-                string line(size.ws_col, '=');
-                cout << line << endl << "\033[" << (size.ws_col - tips.size())/2 << "C" << tips << endl << line << endl;
-            }
-
+            cout << "get_id_list = " << _get_id_list << endl;
         }
     }
 
@@ -157,10 +139,12 @@ public:
 
         if(_get_id_list){
             _id_list.data.resize(0, 0);
-            _id_list.data.resize(_uavNumbers + 1, 0);
+            _id_list.data.resize(_uavNumbers, 0);
             _delta_yaw = 0.0;
             _full_id_list = false;
-            // 获得flu转enu的平均偏转角
+            cout << "=============================== start ===============================" << endl;
+            cout << "init: " << endl << _id_list << endl;
+            // 得出flu转enu的平均偏转角
             for(int i(0); i < _uavIds; i++){
                 if(i == status.StatusArray[i].id - 1){
                     geometry_msgs::QuaternionStamped quat_msg;
@@ -173,26 +157,41 @@ public:
                     }
                 }
             }
+            cout << "detal_yaw = " << _delta_yaw << endl;
+            cout << "yawangle = " << _yawAngle << endl;
+
+            /*cout << endl << "==================== pos_arr =================== "<< endl;
+            for(int i(0); i < _uavIds; i++){
+                cout << "uav " << i + 1 << ": y = " << _pos_arr.y[i] << endl;
+            }
+            cout << endl << "========================= id_list ========================" << endl;
+            for(int i(0),j(1); i < _uavNumbers; i++){
+                _pos_arr.y[i] = j;
+                j++;
+                cout << "uav " << _id_list.data[i] << ": = " << _pos_arr.y[_id_list.data[i] - 1] << endl;
+            }*/
+//            cout << endl << "----------------------- current -----------------------" << endl;
+
             // 把 id 添加进 id_list
             int empty = 0;
             for(int i(0); i < _uavIds; i++){
                 if(i == status.StatusArray[i].id - 1){
-                    push_id_to_idList(int(status.StatusArray[i].id), empty);
+                    push_id_to_idList(status.StatusArray[i].id, empty);
                 } else {
                     if(status.StatusArray[i].id != 0){
                         ROS_ERROR("status.StatusArray[%d].id = %d", i, status.StatusArray[i].id);
                     }
                 }
             }
-            // id排序
+
             sort(empty);
 
             cout << endl << "----------------------- finally sort -----------------------" << endl;
-            for(int i(0); i < _uavNumbers; i++){
+            for(int i(0); i < _uavNumbers + 1; i++){
                 cout << "uav " << _id_list.data[i] << ": = " << _pos_arr.y[_id_list.data[i] - 1] << endl;
             }
-            cout << "finally_front_index = " << _id_list.data[_uavNumbers] << endl;
 
+            cout << "========================== end ==========================" << endl;
             _get_id_list = false;
         }
         _id_list_pub.publish(_id_list);
@@ -225,6 +224,7 @@ public:
                 if(empty == 0){
                     _full_id_list = true;
                 }
+                //sort(empty);
             }
         }
     }
@@ -249,48 +249,47 @@ public:
         for(int i(0); i < exist; i++){
             pos_flu[i].resize(3,0);
         }
+        // 假定位置
+        cout << endl << "----------------------- before sort -----------------------" << endl;
+        cout << "_delta_yaw = " << _delta_yaw << endl;
+        cout << "yaw angle = " << _yawAngle << endl;
+        _id_list.data[0] = 3; _id_list.data[1] = 5; _id_list.data[2] = 2; _id_list.data[3] = 8;
+        _pos_arr.x[2] = -1.06066; _pos_arr.y[2] = -1.06066;
+        _pos_arr.x[4] = 1.06066; _pos_arr.y[4] = 1.06066;
+        _pos_arr.x[1] = -3.18198; _pos_arr.y[1] = 1.06066;
+        _pos_arr.x[7] = -1.06066; _pos_arr.y[7] = 3.18198;
 
-        cout << "----------------- before to_enu -----------------" << endl;
-        for(int i(0); i < exist; i++){
-            cout << "uav" << _id_list.data[i] << "(" << _pos_arr.x[_id_list.data[i] - 1] << ", " << _pos_arr.y[_id_list.data[i] - 1] << ")" << endl;
-        }
-        cout << endl;
         // enu转flu后的位置
         for(int i(0); i < exist; i++){
             pos_flu[i][0] = _id_list.data[i];
             pos_flu[i][1] = _pos_arr.x[_id_list.data[i] - 1];
             pos_flu[i][2] = _pos_arr.y[_id_list.data[i] - 1];
             pos_enu2flu(pos_flu[i][1], pos_flu[i][2]);
+            cout << "uav" << _id_list.data[i] << "(" << _pos_arr.x[_id_list.data[i] - 1] << "," << _pos_arr.y[_id_list.data[i] - 1] << ")"<< endl;
+            cout << "uav" << _id_list.data[i] << "(" << pos_flu[i][1] << "," << pos_flu[i][2] << ")"<< endl << endl;
         }
-        cout << "----------------- before sort -----------------" << endl;
-        for(int i(0); i < exist; i++){
-            cout << "uav" << pos_flu[i][0] << "(" << pos_flu[i][1] << ", " << pos_flu[i][2] << ")" << endl;
-        }
-        cout << endl;
         // 从后往前检索 id_list，按y的大小由大到小排列
         for(int n(0); n < exist; n++){
             for(int i = exist - 1; i >= 1; i--) {
-                if (pos_flu[i][1] > pos_flu[i-1][1]) {
+                if (pos_flu[i][2] > pos_flu[i-1][2]) {
                     vector<double> tmp = {0,0,0};
                     tmp = pos_flu[i-1];
                     pos_flu[i-1] = pos_flu[i];
                     pos_flu[i] = tmp;
                 }
             }
+            cout << endl << "----------------------- next sort -----------------------" << endl;
+            for(int i(0); i < exist; i++){
+                cout << "uav " << pos_flu[i][0] << ": = " << pos_flu[i][2] << endl;
+            }
         }
         for(int i(0); i < exist; i++){
             _id_list.data[i] = int(pos_flu[i][0]);
         }
-
-        cout << "----------------- next sort -----------------" << endl;
-        for(int i(0); i < exist; i++){
-            cout << "uav" << pos_flu[i][0] << "(" << pos_flu[i][1] << ", " << pos_flu[i][2] << ")" << endl;
-        }
-
         // 记录平均机身坐标系下，在y轴上和下一架无人机间距大于 1m 的第一架无人机
         for(int i(0); i < exist - 1; i++){
-            if(abs(pos_flu[i][1] - pos_flu[i+1][1]) > 3){
-                _id_list.data[_uavNumbers] = i;
+            if(abs(pos_flu[i][2] - pos_flu[i+1][2]) > 1){
+                _id_list.data[_uavNumbers] = int(pos_flu[i][0]);
                 cout << "The Y-axis between the Y-axis is more than 1m is uav"
                      << pos_flu[i][0] << " and uav" << pos_flu[i+1][0] << endl;
                 return;
@@ -298,81 +297,38 @@ public:
         }
     }
 
+    // 赋值速度消息
+
+
     void quat2Tf2Rpy(const geometry_msgs::QuaternionStamped &msg, int id){
         tf::Quaternion quat;
         tf::quaternionMsgToTF(msg.quaternion,quat);
         tf::Matrix3x3(quat).getRPY(_roll, _pitch, _yaw);
-        cout << "uav" << id << "_angle = " << (_yaw/M_PI)*180<< "°" << endl;
-        // ========================== 分割线 =============================
+
         if(_delta_yaw == 0.0){
             _delta_yaw = _yaw;
         }
-        double angle_limit = 30;
-        double angle_limit_rad = angle_limit / 180.0 * M_PI;
-        double angle = abs(_delta_yaw - _yaw);
+        int angle = 30;
+        double delta_angle = angle / 180.0 * M_PI;
 
-        // 死区处理
-        if(_yaw < -(M_PI - angle_limit_rad) && _delta_yaw > (M_PI - angle_limit_rad)){
-            angle = (M_PI - _delta_yaw) + (M_PI + _yaw);
-            if(angle > angle_limit_rad){
-                cout << "\033[33m[WARN]: uav" << id << " and other drones have more than " << angle_limit << "°\33[0m" << endl;
-                cout << "delta_angle = " << _delta_yaw*180/M_PI << endl;
-                cout << "uav" << id << "_angle = " << _yaw*180/M_PI << endl << endl;
-                _yaw = _delta_yaw;
-                ROS_WARN("shutdown now!");
-                ros::shutdown();
-                return;
-            } else {
-                if(_delta_yaw > abs(_yaw)){
-                    _delta_yaw = (_yaw - _delta_yaw)/2;
-                } else {
-                    _delta_yaw = (_delta_yaw - _yaw)/2;
-                }
-            }
-        } else if(_yaw > (M_PI - angle_limit_rad) && _delta_yaw < -(M_PI - angle_limit_rad)){
-            angle = (M_PI - _yaw) + (M_PI + _delta_yaw);
-            if(angle > angle_limit_rad){
-                cout << "\033[33m[WARN]: uav" << id << " and other drones have more than " << angle_limit << "°\33[0m" << endl;
-                cout << "delta_angle = " << _delta_yaw*180/M_PI << endl;
-                cout << "uav" << id << "_angle = " << _yaw*180/M_PI << endl << endl;
-                _yaw = _delta_yaw;
-                ROS_WARN("shutdown now!");
-                ros::shutdown();
-                return;
-            } else {
-                if(_yaw > abs(_delta_yaw)){
-                    _delta_yaw = (_delta_yaw - _yaw)/2;
-                } else {
-                    _delta_yaw = (_yaw - _delta_yaw)/2;
-                }
-            }
-        } else { // 死区外
-            angle = abs(_delta_yaw - _yaw);
-            if(angle > angle_limit_rad){
-                cout << "\033[33m[WARN]: uav" << id << " and other drones have more than " << angle_limit << "°\33[0m" << endl;
-                cout << "delta_angle = " << _delta_yaw*180/M_PI << endl;
-                cout << "uav" << id << "_angle = " << _yaw*180/M_PI << endl << endl;
-                _yaw = _delta_yaw;
-                ROS_WARN("shutdown now!");
-                ros::shutdown();
-            }
-            _delta_yaw = (_delta_yaw + _yaw)/2;
+        if(abs(_delta_yaw - _yaw) > delta_angle){
+            cout << "\033[33m[WARN]: uav" << id << " and other drones have more than " << angle << "°\33[0m" << endl;
+            cout << "delta_angle = " << _delta_yaw*180/M_PI << endl;
+            cout << "uav" << id << "_angle = " << _yaw*180/M_PI << endl << endl;
+            _yaw = _delta_yaw;
+            ROS_WARN("shutdown now!");
+            ros::shutdown();
         }
-
+        _delta_yaw = (_delta_yaw + _yaw)/2;
         _yawAngle = _delta_yaw * 180 / M_PI;
     }
 
-    void pos_enu2flu(double &x, double &y){
+    void pos_enu2flu(double &x, double &y){//速度控制转换
         // 二维坐标系旋转变换
         double x_old = x;
         double y_old = y;
-        cout << "angle between ENU and FLU is " << (_delta_yaw/M_PI)*180 << "°" << endl;
-        x = x_old * cos(_delta_yaw) + y_old * sin(_delta_yaw);
-        y = y_old * cos(_delta_yaw) - x_old * sin(_delta_yaw);
-
-        // cout << "angle between ENU and FLU is " << (_yaw/M_PI)*180 << "°" << endl;
-        // x = x_old * cos(_yaw) + y_old * sin(_yaw);
-        // y = y_old * cos(_yaw) - x_old * sin(_yaw);
+        x = x_old * cos(-_delta_yaw) + y_old * sin(-_delta_yaw);
+        y = y_old * cos(-_delta_yaw) - x_old * sin(-_delta_yaw);
 
     }
 };
