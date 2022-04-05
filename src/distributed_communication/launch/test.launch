@@ -1,0 +1,58 @@
+<launch>
+
+    <arg name="thename" default="m100"/><!--无人机名称（每台无人机必须不相同）-->
+    <arg name="axis" default="2"/><!--坐标系：1为全局自然坐标系，2为局部实验坐标系-->
+    <arg name="index" default="1"/>
+    <arg name="name" default="uav$(arg index)"/>
+    <arg name="num" default="50"/>
+    <arg name="rate" default="50"/>
+
+    <node
+        pkg = "distributed_communication"
+        type = "UAV_status_publisher"
+        name = "$(arg name)_UAV_status_publisher"
+        output = "screen"
+        respawn = "true">
+        <param name="uav_index" type="int" value="$(arg index)"/>
+        <param name="uav_name" type="string" value="$(arg name)"/>
+        <param name="axis_id" type="int" value="$(arg axis)"/>
+        <param name="num_uav" type="int" value="$(arg num)"/>
+        <param name="pub_rate" type="int" value="$(arg rate)"/>
+        <remap from="GPS_position" to="$(arg name)/dji_sdk/gps_position"/>
+        <remap from="attitude" to="$(arg name)/dji_sdk/attitude"/>
+        <remap from="GPS_health" to="$(arg name)/dji_sdk/gps_health"/>
+        <remap from="flight_status" to="$(arg name)/dji_sdk/flight_status"/>
+        <remap from="target_position" to="/tag/refine/gps_position"/>
+    </node>
+
+    <node
+        pkg = "distributed_communication"
+        type = "UAV_status_subscriber"
+        name = "$(arg name)_UAV_status_subscriber"
+        output = "screen"
+        respawn = "true">
+        <param name="uav_index" type="int" value="$(arg index)"/>
+        <param name="uav_name" type="string" value="$(arg name)"/>
+        <param name="axis_id" type="int" value="$(arg axis)"/>
+        <param name="num_uav" type="int" value="$(arg num)"/>
+        <remap from="status" to="UAVs/status"/>
+    </node>
+
+    <node
+        pkg = "distributed_communication"
+        type = "test_data_generator"
+        name = "$(arg name)_test_data_generator"
+        output = "screen"
+        respawn = "true">
+        <param name="uav_index" type="int" value="$(arg index)"/>
+        <param name="uav_name" type="string" value="$(arg name)"/>
+        <param name="axis_id" type="int" value="$(arg axis)"/>
+        <param name="num_uav" type="int" value="$(arg num)"/>
+        <remap from="GPS_position" to="$(arg name)/dji_sdk/gps_position"/>
+        <remap from="attitude" to="$(arg name)/dji_sdk/attitude"/>
+        <remap from="GPS_health" to="$(arg name)/dji_sdk/gps_health"/>
+        <remap from="flight_status" to="$(arg name)/dji_sdk/flight_status"/>
+        <remap from="target_position" to="/tag/refine/gps_position"/>
+    </node>
+
+</launch>
